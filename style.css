@@ -1,5 +1,12 @@
+.navbar {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 1000; /* The navbar is above other content */
+  }
+  
 body {
-    padding-top: 10px;
+    padding-top: 20px; /* This value based on the height of the navbar */
 }
 
 section {
