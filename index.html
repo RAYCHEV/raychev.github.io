@@ -89,18 +89,26 @@
 
     <section id="contact" class="container mt-5">
         <h1>Contact</h1>
-        <form>
+        <form action="https://formspree.io/f/mjvnaryp" method="POST" class="needs-validation" novalidate>
             <div class="form-group">
                 <label for="email">Email address</label>
-                <input type="email" class="form-control" id="email" aria-describedby="emailHelp">
+                <input type="email" class="form-control" id="email" name="email" aria-describedby="emailHelp" required>
+                <div class="invalid-feedback">
+                    Please enter a valid email address.
+                </div>
             </div>
             <div class="form-group">
                 <label for="message">Message</label>
-                <textarea class="form-control" id="message" rows="3"></textarea>
+                <textarea class="form-control" id="message" name="message" rows="3" required></textarea>
+                <div class="invalid-feedback">
+                    Please enter your message.
+                </div>
             </div>
-            <button type="submit" class="btn btn-primary">Submit</button>
+            <button type="submit" class="btn btn-primary">Send</button>
+            <!-- other form fields may go here -->
         </form>
     </section>
+    
 
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
