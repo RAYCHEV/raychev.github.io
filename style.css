@@ -10,7 +10,7 @@ body {
 }
 
 section {
-    padding: 10px 0;
+    padding: 10px;
 }
 
 h1 {
@@ -21,3 +21,23 @@ h1 {
     width: 200px;
     height: 200px;
 }
+
+.custom-card {
+    position: relative; /* Allows absolute positioning relative to the card */
+    padding: 10px;
+    border: 2px solid;
+    margin: 10px;
+  }
+  
+  .card-label {
+    position: absolute;
+    top: -15px;
+    right: 20px;
+    background-color: white;
+    padding: 0 4px; /* Add some padding around the text */
+  }
+  
+  /* Ensure input borders and other styles if needed */
+  .card-body input {
+    border: none;
+  }
