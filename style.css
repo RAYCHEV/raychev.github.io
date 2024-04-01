@@ -16,3 +16,8 @@ section {
 h1 {
     margin-bottom: 20px;
 }
+
+.about-me-image {
+    width: 200px;
+    height: 200px;
+}
