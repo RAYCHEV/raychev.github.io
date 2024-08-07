@@ -50,12 +50,10 @@ h1 {
 }
 
 .small-image {
-    width: 50px;
     height: 50px;
 }
 
 .expanded-image {
-    width: 300px;
     height: 300px;
     z-index: 1050;
     position: absolute;
