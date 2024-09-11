@@ -62,3 +62,21 @@ h1 {
     border: 2px solid black;
     box-shadow: 0px 0px 10px rgba(0,0,0,0.5);
 }
+
+.card {
+  position: relative;
+}
+
+/* Style the card image to be positioned 50px to the left of the title */
+.card-img-top {
+  position: absolute;
+  left: 10;
+  top: 0; /* Vertically center the image relative to the card body */
+  transform: translateY(-50%); /* Adjust for vertical centering */
+  width: 50px; /* Adjust size if needed */
+}
+
+/* Style the title to ensure proper horizontal alignment */
+.card-title {
+  text-align: center; /* Offset title to the right to align with the image */
+}
