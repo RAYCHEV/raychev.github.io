@@ -2,6 +2,29 @@
 
 Welcome to my personal portfolio! This website showcases some of my software development projects, highlighting a variety of technologies I've worked with. Feel free to explore and reach out if you have any questions or opportunities.
 
+## 🚀 React Portfolio
+
+Този проект е конвертиран в React приложение с Vite и е готов за деплой в GitHub Pages.
+
+### Локална разработка
+
+```bash
+# Инсталирай зависимостите
+npm install
+
+# Стартирай development server
+npm run dev
+```
+
+### Деплой в GitHub Pages
+
+```bash
+# Деплой автоматично
+npm run deploy
+```
+
+За повече информация виж [DEPLOYMENT.md](./DEPLOYMENT.md)
+
 ## Table of Contents
 - About Me
 - Projects
