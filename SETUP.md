@@ -1,46 +1,44 @@
-# Настройка на React Portfolio
+# React Portfolio Setup
 
-## Първи стъпки
+## First Steps
 
-1. **Инсталирай Node.js** (ако все още не е инсталиран)
-   - Изтегли от [nodejs.org](https://nodejs.org/)
-   - Препоръчителна версия: 18.x или по-нова
+1. **Install Node.js** (if not already installed)
+   - Download from [nodejs.org](https://nodejs.org/)
+   - Recommended version: 18.x or newer
 
-2. **Инсталирай зависимостите:**
+2. **Install dependencies:**
 ```bash
 npm install
 ```
 
-3. **Тествай локално:**
+3. **Test locally:**
 ```bash
 npm run dev
 ```
-Отвори браузъра на `http://localhost:5173`
+Open your browser at `http://localhost:5173`
 
-## Структура на проекта
+## Project Structure
 
 ```
 raychev.github.io/
-├── public/              # Статични файлове (снимки, CNAME)
-│   ├── img/            # Всички снимки
-│   └── CNAME           # Custom domain конфигурация
-├── src/                # React компоненти
-│   ├── components/     # React компоненти
-│   ├── App.jsx         # Главен компонент
+├── public/              # Static files (images, CNAME)
+│   ├── img/            # All images
+│   └── CNAME           # Custom domain configuration
+├── src/                # React components
+│   ├── components/     # React components
+│   ├── App.jsx         # Main component
 │   ├── main.jsx        # Entry point
-│   └── index.css       # Стилове
-├── package.json        # Зависимости и скриптове
-└── vite.config.js      # Vite конфигурация
+│   └── index.css       # Styles
+├── package.json        # Dependencies and scripts
+└── vite.config.js      # Vite configuration
 ```
 
-## Деплой
+## Deployment
 
-Виж [DEPLOYMENT.md](./DEPLOYMENT.md) за пълни инструкции за деплой.
+See [DEPLOYMENT.md](./DEPLOYMENT.md) for full deployment instructions.
 
-## Важни бележки
+## Important Notes
 
-- Старите файлове (`script.js`, `style.css`, оригиналният `index.html`) са запазени, но вече не се използват
-- Всички снимки са преместени в `public/img/`
-- React приложението използва същите стилове и функционалност като оригиналния сайт
-
-
+- Old files (`script.js`, `style.css`, original `index.html`) are preserved but no longer used
+- All images have been moved to `public/img/`
+- The React application uses the same styles and functionality as the original site

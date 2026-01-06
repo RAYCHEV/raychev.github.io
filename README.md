@@ -4,26 +4,26 @@ Welcome to my personal portfolio! This website showcases some of my software dev
 
 ## 🚀 React Portfolio
 
-Този проект е конвертиран в React приложение с Vite и е готов за деплой в GitHub Pages.
+This project has been converted to a React application with Vite and is ready for deployment to GitHub Pages.
 
-### Локална разработка
+### Local Development
 
 ```bash
-# Инсталирай зависимостите
+# Install dependencies
 npm install
 
-# Стартирай development server
+# Start development server
 npm run dev
 ```
 
-### Деплой в GitHub Pages
+### Deploy to GitHub Pages
 
 ```bash
-# Деплой автоматично
+# Automatic deployment
 npm run deploy
 ```
 
-За повече информация виж [DEPLOYMENT.md](./DEPLOYMENT.md)
+For more information, see [DEPLOYMENT.md](./DEPLOYMENT.md)
 
 ## Table of Contents
 - About Me
