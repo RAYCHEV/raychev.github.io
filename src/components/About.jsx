@@ -16,12 +16,9 @@ function About() {
         <div className="col-md-8">
           <h1>About Me</h1>
           <p>
-            I am an IT Support professional with a comprehensive and dynamic skill set that spans 
-            across IT support analysis, network security, software development, and native mobile 
-            app development. With several years of experience in the IT field, I have developed 
-            a unique ability to address complex challenges with strategic and innovative solutions. 
-            My expertise includes a strong foundation in iOS native development, cross-platform 
-            and web development.
+            Software engineer focused on building modern web and mobile apps. I combine strong 
+            analysis with hands-on development to turn real requirements into clean, maintainable 
+            software—mainly with JavaScript/React for the web and native + React Native for mobile.
           </p>
         </div>
       </div>
