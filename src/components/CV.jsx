@@ -1,20 +1,20 @@
 import React from 'react'
 
-function About() {
+function CV() {
   return (
-    <section id="about" className="container mt-5">
+    <section id="cv" className="container mt-5">
       <div className="row">
         {/* Picture Column */}
         <div className="col-md-4">
           <img 
             src="/img/8bitFinalFantasyScene.png" 
-            alt="About Me" 
+            alt="CV" 
             className="img-fluid about-me-image"
           />
         </div>
         {/* Text Column */}
         <div className="col-md-8">
-          <h1>About Me</h1>
+          <h1>CV</h1>
           <p>
             Software engineer focused on building modern web and mobile apps. I combine strong 
             analysis with hands-on development to turn real requirements into clean, maintainable 
@@ -26,6 +26,4 @@ function About() {
   )
 }
 
-export default About
-
-
+export default CV
