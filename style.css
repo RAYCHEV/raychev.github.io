@@ -99,3 +99,42 @@ h1 {
   text-align: left;             /* Align the text to the left */
   font-size: 1.25rem;           /* Adjust the font size */
 }
+
+/* Collapsed project descriptions */
+.card-text-clamp {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Buttons and the expand link share one row */
+.card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+  margin-top: 12px;
+}
+
+.card-actions .btn {
+  margin: 0;
+}
+
+.card-text-toggle {
+  padding: 0;
+  border: none;
+  background: none;
+  color: #007bff;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+.card-text-toggle:hover,
+.card-text-toggle:focus {
+  color: #0056b3;
+  text-decoration: underline;
+}

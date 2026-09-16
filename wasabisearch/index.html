@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WasabiSearch Support — Software Developer Portfolio</title>
+    <meta
+      name="description"
+      content="Support and setup guide for WasabiSearch, an iOS app for searching files in Wasabi S3-compatible cloud storage."
+    />
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="../style.css" />
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+      <a class="navbar-brand" href="../index.html">TheXcoder.com</a>
+      <button
+        class="navbar-toggler"
+        type="button"
+        data-target="#navbarNav"
+        aria-controls="navbarNav"
+        aria-expanded="false"
+        aria-label="Toggle navigation"
+      >
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ml-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="../index.html">Live Projects</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="../discontinued/index.html">Discontinued</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="../contact.html">Contact</a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+
+    <section id="wasabisearch" class="container mt-5">
+      <h1>WasabiSearch Support</h1>
+      <p>
+        WasabiSearch is an iOS application designed to help you quickly search for files stored in
+        your own Wasabi S3-compatible cloud storage.
+      </p>
+      <p>
+        The app connects directly to your Wasabi account using credentials provided by you and
+        searches object filenames within the selected bucket.
+      </p>
+
+      <h2 class="mt-4">Getting Started</h2>
+      <p>To use WasabiSearch, you need:</p>
+      <ul>
+        <li>A Wasabi account</li>
+        <li>An Access Key ID</li>
+        <li>A Secret Access Key</li>
+        <li>The correct Wasabi endpoint/region</li>
+        <li>Access to at least one storage bucket</li>
+      </ul>
+      <p>You can create and manage access keys from your Wasabi account.</p>
+
+      <h2 class="mt-4">Setting Up a Connection</h2>
+      <p>Open WasabiSearch and go to Settings.</p>
+      <p>Create a new credential profile and enter:</p>
+      <ul>
+        <li>Profile name</li>
+        <li>Access Key ID</li>
+        <li>Secret Access Key</li>
+        <li>Endpoint</li>
+        <li>Region</li>
+        <li>Service</li>
+        <li>Bucket</li>
+      </ul>
+      <p>Your credentials are stored securely in the iOS Keychain.</p>
+      <p>
+        WasabiSearch can also retrieve the list of buckets available to the supplied credentials.
+      </p>
+
+      <h2 class="mt-4">Searching for Files</h2>
+      <p>From the main screen:</p>
+      <ol>
+        <li>Select the required profile or bucket.</li>
+        <li>Enter part or all of a filename.</li>
+        <li>Start the search.</li>
+      </ol>
+      <p>
+        The search is case-insensitive and matches the filename rather than requiring an exact full
+        path.
+      </p>
+      <p>For example, searching for:</p>
+      <p><code>WF27174</code></p>
+      <p>can find an object such as:</p>
+      <p><code>backups/projects/2026/WF27174-document.pdf</code></p>
+      <p>Results appear progressively while the bucket is being scanned.</p>
+      <p>You can stop a running search at any time.</p>
+
+      <h2 class="mt-4">Search Results</h2>
+      <p>Search results display the paths of matching objects.</p>
+      <p>You can:</p>
+      <ul>
+        <li>Copy an individual result</li>
+        <li>Copy all results</li>
+        <li>Stop an active search</li>
+        <li>Start another search</li>
+      </ul>
+      <p>WasabiSearch does not modify or delete objects in your bucket.</p>
+
+      <h2 class="mt-4">Troubleshooting</h2>
+
+      <h3 class="mt-3">No buckets are displayed</h3>
+      <p>Check that:</p>
+      <ul>
+        <li>Your Access Key ID and Secret Access Key are correct.</li>
+        <li>The selected endpoint and region match your Wasabi storage region.</li>
+        <li>The credentials have permission to list the required buckets.</li>
+      </ul>
+
+      <h3 class="mt-3">Search returns no results</h3>
+      <p>Check the spelling of the filename or try searching using a smaller part of the name.</p>
+      <p>
+        Remember that WasabiSearch searches object filenames and the search is case-insensitive.
+      </p>
+
+      <h3 class="mt-3">Authentication or connection error</h3>
+      <p>Verify your Access Key ID, Secret Access Key, endpoint and region.</p>
+      <p>
+        Network access is also required to communicate with the Wasabi S3-compatible service.
+      </p>
+
+      <h3 class="mt-3">Search takes a long time</h3>
+      <p>
+        Large buckets can contain many objects. WasabiSearch uses S3 ListObjectsV2 pagination to
+        scan the bucket, so searching very large buckets may take some time.
+      </p>
+      <p>Results are displayed progressively as matching objects are discovered.</p>
+
+      <h2 class="mt-4">Security &amp; Privacy</h2>
+      <p>WasabiSearch connects directly to the configured S3-compatible service.</p>
+      <p>
+        Access credentials entered into the app are stored securely using the Apple Keychain.
+      </p>
+      <p>The application does not require your Wasabi account password.</p>
+      <p>
+        You should use access credentials with only the permissions necessary for the operations you
+        intend to perform.
+      </p>
+
+      <h2 class="mt-4">Need Help?</h2>
+      <p>
+        If you experience a problem with WasabiSearch, please
+        <a href="../contact.html">contact support</a> and include:
+      </p>
+      <ul>
+        <li>App version</li>
+        <li>iOS/iPadOS version</li>
+        <li>Device model</li>
+        <li>Wasabi region/endpoint</li>
+        <li>A short description of the problem</li>
+      </ul>
+      <p>For security reasons, never send your Secret Access Key when requesting support.</p>
+
+      <h2 class="mt-4">About</h2>
+      <p>WasabiSearch is an independent application for accessing S3-compatible storage.</p>
+      <p>
+        Wasabi and related Wasabi product names are trademarks of their respective owners.
+        WasabiSearch is not affiliated with or endorsed by Wasabi Technologies.
+      </p>
+    </section>
+
+    <script src="../script.js"></script>
+  </body>
+</html>

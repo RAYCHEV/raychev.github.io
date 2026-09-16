@@ -2,31 +2,118 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="alternate icon" href="/favicon.ico" />
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Software Developer Portfolio</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <title>Live Projects — Software Developer Portfolio</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="style.css" />
   </head>
   <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-    <script type="text/javascript">
-      // Single Page Apps for GitHub Pages
-      // https://github.com/rafgraph/spa-github-pages
-      (function(l) {
-        if (l.search[1] === '/' ) {
-          var decoded = l.search.slice(1).split('&').map(function(s) { 
-            return s.replace(/~and~/g, '&')
-          }).join('?');
-          window.history.replaceState(null, null,
-              l.pathname.slice(0, -1) + decoded + l.hash
-          );
-        }
-      }(window.location))
-    </script>
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+      <a class="navbar-brand" href="index.html">TheXcoder.com</a>
+      <button
+        class="navbar-toggler"
+        type="button"
+        data-target="#navbarNav"
+        aria-controls="navbarNav"
+        aria-expanded="false"
+        aria-label="Toggle navigation"
+      >
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ml-auto">
+          <li class="nav-item active">
+            <a class="nav-link" href="index.html">Live Projects</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="discontinued/index.html">Discontinued</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="contact.html">Contact</a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+
+    <section id="live-projects" class="container mt-5">
+      <h1>Live Projects</h1>
+      <p>
+        Current work and tools that are actively maintained. Older work lives under
+        <a href="discontinued/index.html">Discontinued</a>.
+      </p>
+
+      <h2 class="mt-4">iOS Apps</h2>
+      <div class="row">
+        <div class="col-md-4 mb-4">
+          <div class="card">
+            <label class="card-label">iOS</label>
+            <div class="card-body">
+              <h5 class="card-title">WasabiSearch</h5>
+              <p class="card-text">
+                Search files in your own Wasabi S3-compatible cloud storage straight from your
+                iPhone or iPad. Add a credential profile, pick a bucket and type part of a filename
+                — results come in progressively while the bucket is scanned, and nothing in the
+                bucket is ever modified.
+              </p>
+              <a class="btn btn-secondary disabled" aria-disabled="true" tabindex="-1">
+                App Store
+              </a>
+              <a href="wasabisearch/index.html" class="btn btn-primary">
+                Support page
+              </a>
+              <small class="text-muted d-block mt-2">Coming soon on the App Store.</small>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <h2 class="mt-4">JS</h2>
+      <div class="row">
+        <div class="col-md-4 mb-4">
+          <div class="card">
+            <label class="card-label">JavaScript</label>
+            <div class="card-body">
+              <h5 class="card-title">CSV Viewer</h5>
+              <p class="card-text">
+                Upload a CSV file, browse it as a table, edit, search and export it again.
+              </p>
+              <a
+                href="csv-viewer/index.html"
+                class="btn btn-primary"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Open app
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+          <div class="card">
+            <label class="card-label">JavaScript</label>
+            <div class="card-body">
+              <h5 class="card-title">Drawix — Construction Drawing Measurement Tool</h5>
+              <p class="card-text">
+                Upload a construction drawing (JPG, PNG or PDF), calibrate it with a reference line of
+                known length, then trace lines, pipes and points over it. Closed shapes are measured
+                automatically, so you get areas in square metres straight from the drawing.
+              </p>
+              <a
+                href="https://thexcoder.com/drawix/"
+                class="btn btn-primary"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Open app
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <script src="script.js"></script>
   </body>
 </html>
