@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="../../favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WasabiSearch Privacy Policy — Software Developer Portfolio</title>
+    <meta
+      name="description"
+      content="Privacy Policy for WasabiSearch, an iOS app for searching files in Wasabi S3-compatible cloud storage."
+    />
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="../../style.css" />
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+      <a class="navbar-brand" href="../../index.html">TheXcoder.com</a>
+      <button
+        class="navbar-toggler"
+        type="button"
+        data-target="#navbarNav"
+        aria-controls="navbarNav"
+        aria-expanded="false"
+        aria-label="Toggle navigation"
+      >
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ml-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="../../index.html">Live Projects</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="../../discontinued/index.html">Discontinued</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="../../contact.html">Contact</a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+
+    <section id="wasabisearch-privacy" class="container mt-5">
+      <h1>Privacy Policy for WasabiSearch</h1>
+      <p class="text-muted">Last updated: 17 September 2026</p>
+      <p>
+        WasabiSearch is designed to allow users to search for files stored in their own Wasabi
+        S3-compatible cloud storage.
+      </p>
+      <p>
+        This Privacy Policy explains what information WasabiSearch uses, how that information is
+        stored, and how it is handled.
+      </p>
+
+      <h2 class="mt-4">Information You Provide</h2>
+      <p>To connect to your S3-compatible storage, WasabiSearch may require you to provide:</p>
+      <ul>
+        <li>Access Key ID</li>
+        <li>Secret Access Key</li>
+        <li>S3 endpoint</li>
+        <li>Region</li>
+        <li>Service</li>
+        <li>Bucket information</li>
+        <li>A name for the connection profile</li>
+      </ul>
+      <p>
+        These details are provided directly by you and are used to establish a connection to the
+        configured S3-compatible storage service.
+      </p>
+
+      <h2 class="mt-4">Storage of Credentials</h2>
+      <p>
+        Access credentials are stored locally on your device using Apple’s Keychain services.
+      </p>
+      <p>WasabiSearch does not require your Wasabi account password.</p>
+      <p>
+        You are responsible for managing your access keys and the permissions associated with them.
+      </p>
+      <p>
+        For additional security, we recommend using credentials with only the permissions necessary
+        to use the application.
+      </p>
+
+      <h2 class="mt-4">Communication with S3-Compatible Storage</h2>
+      <p>WasabiSearch communicates with the S3-compatible service configured by the user.</p>
+      <p>
+        The application uses the supplied credentials to perform operations required for features
+        such as:
+      </p>
+      <ul>
+        <li>Retrieving available buckets</li>
+        <li>Listing objects within a selected bucket</li>
+        <li>Searching object filenames</li>
+      </ul>
+      <p>
+        Searches may require the application to scan object keys using the S3 ListObjectsV2 API and
+        its pagination mechanism.
+      </p>
+      <p>
+        WasabiSearch does not upload, modify or delete objects as part of its search functionality.
+      </p>
+
+      <h2 class="mt-4">File Information</h2>
+      <p>
+        WasabiSearch may process object names, paths and related information returned by the
+        configured S3-compatible service in order to perform searches and display results.
+      </p>
+      <p>This information is processed as part of the application’s functionality.</p>
+      <p>
+        WasabiSearch does not need to download the contents of files in order to search their
+        filenames.
+      </p>
+
+      <h2 class="mt-4">Search Queries</h2>
+      <p>
+        Search terms entered into WasabiSearch are used to find matching filenames within the
+        selected bucket.
+      </p>
+      <p>
+        The application does not use your search queries for advertising or marketing purposes.
+      </p>
+
+      <h2 class="mt-4">Personal Information</h2>
+      <p>WasabiSearch does not require you to create a WasabiSearch user account.</p>
+      <p>
+        The application does not require information such as your name, postal address or telephone
+        number to provide its core search functionality.
+      </p>
+
+      <h2 class="mt-4">Analytics and Advertising</h2>
+      <p>
+        WasabiSearch does not use your S3 credentials, bucket information, object paths or search
+        queries for advertising.
+      </p>
+      <p>
+        If analytics or diagnostic services are introduced in a future version of the application,
+        this Privacy Policy will be updated to describe the information collected and how it is
+        used.
+      </p>
+
+      <h2 class="mt-4">Third-Party Services</h2>
+      <p>WasabiSearch connects to storage services configured by the user.</p>
+      <p>
+        When using Wasabi or another S3-compatible service, information transmitted to that service
+        is also subject to the privacy policy and terms of the respective service provider.
+      </p>
+      <p>
+        WasabiSearch is an independent application and is not affiliated with or endorsed by Wasabi
+        Technologies.
+      </p>
+
+      <h2 class="mt-4">Data Sharing</h2>
+      <p>WasabiSearch does not sell your personal information.</p>
+      <p>
+        Your S3 access credentials are used for the purpose of communicating with the storage
+        service configured by you.
+      </p>
+
+      <h2 class="mt-4">Data Retention and Removal</h2>
+      <p>
+        Connection information stored by WasabiSearch remains on the device until it is removed
+        through the application or otherwise removed from the device’s storage and Keychain
+        environment.
+      </p>
+      <p>You can remove configured credential profiles from within WasabiSearch.</p>
+      <p>Access keys can also be revoked or deleted through your S3 storage provider.</p>
+
+      <h2 class="mt-4">Security</h2>
+      <p>
+        WasabiSearch uses Apple’s Keychain services for storing sensitive access credentials.
+      </p>
+      <p>
+        However, no method of electronic storage or transmission can be guaranteed to be completely
+        secure.
+      </p>
+      <p>
+        You should never share your Secret Access Key with anyone, including when requesting
+        technical support.
+      </p>
+      <p>
+        If you believe an access key has been exposed, revoke it through your storage provider and
+        create a new one.
+      </p>
+
+      <h2 class="mt-4">Children’s Privacy</h2>
+      <p>
+        WasabiSearch is not specifically directed at children and does not knowingly collect
+        personal information from children.
+      </p>
+
+      <h2 class="mt-4">Changes to This Privacy Policy</h2>
+      <p>
+        This Privacy Policy may be updated when WasabiSearch functionality changes or when necessary
+        to reflect legal, technical or regulatory requirements.
+      </p>
+      <p>
+        The latest version will be published on this page together with the date it was last
+        updated.
+      </p>
+
+      <h2 class="mt-4">Contact</h2>
+      <p>
+        If you have questions about this Privacy Policy or the way WasabiSearch handles information,
+        please contact us through the
+        <a href="../../contact.html">contact page</a>.
+      </p>
+      <p>
+        <a href="../index.html">Back to WasabiSearch Support</a>
+      </p>
+    </section>
+
+    <script src="../../script.js"></script>
+  </body>
+</html>
