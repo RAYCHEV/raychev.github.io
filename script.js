@@ -65,9 +65,67 @@ document.addEventListener('DOMContentLoaded', function () {
   var contactForm = document.getElementById('contact-form');
   var contactStatus = document.getElementById('contact-status');
   if (contactForm) {
+    var emailField = contactForm.querySelector('#email');
+    var messageField = contactForm.querySelector('#message');
+    var minMessageLength = 10;
+
+    function setFieldError(field, message) {
+      var feedback = contactForm.querySelector('[data-error-for="' + field.id + '"]');
+      if (feedback) feedback.textContent = message || '';
+      field.classList.toggle('is-invalid', Boolean(message));
+      field.setAttribute('aria-invalid', message ? 'true' : 'false');
+    }
+
+    function validateEmail() {
+      var value = emailField.value.trim();
+      if (!value) return 'Please enter your email address.';
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value)) {
+        return 'Please enter a valid email address, for example name@example.com.';
+      }
+      return '';
+    }
+
+    function validateMessage() {
+      var value = messageField.value.trim();
+      if (!value) return 'Please write a message.';
+      if (value.length < minMessageLength) {
+        return 'Please write at least ' + minMessageLength + ' characters so I know what it is about.';
+      }
+      return '';
+    }
+
+    [[emailField, validateEmail], [messageField, validateMessage]].forEach(function (pair) {
+      var field = pair[0];
+      var validate = pair[1];
+      field.addEventListener('input', function () {
+        if (field.classList.contains('is-invalid')) setFieldError(field, validate());
+      });
+      field.addEventListener('blur', function () {
+        if (field.value.trim()) setFieldError(field, validate());
+      });
+    });
+
     contactForm.addEventListener('submit', function (event) {
       event.preventDefault();
+
+      var emailError = validateEmail();
+      var messageError = validateMessage();
+      setFieldError(emailField, emailError);
+      setFieldError(messageField, messageError);
+
+      if (emailError || messageError) {
+        if (contactStatus) {
+          contactStatus.hidden = false;
+          contactStatus.className = 'mt-3 text-danger';
+          contactStatus.textContent = 'Please fix the fields marked above and try again.';
+        }
+        (emailError ? emailField : messageField).focus();
+        return;
+      }
+
       var data = new FormData(contactForm);
+      data.set('email', emailField.value.trim());
+      data.set('message', messageField.value.trim());
       var submitButton = contactForm.querySelector('button[type="submit"]');
       if (submitButton) submitButton.disabled = true;
       if (contactStatus) {
@@ -84,6 +142,8 @@ document.addEventListener('DOMContentLoaded', function () {
         if (submitButton) submitButton.disabled = false;
         if (response.ok) {
           contactForm.reset();
+          setFieldError(emailField, '');
+          setFieldError(messageField, '');
           if (contactStatus) {
             contactStatus.className = 'mt-3 text-success';
             contactStatus.textContent = 'Thanks — your message was sent.';
