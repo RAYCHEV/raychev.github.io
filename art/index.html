@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Tone Simplifier — Art</title>
+    <meta
+      name="description"
+      content="Simplify a photo into paintable value shapes. Control the simplification, switch between black and white and color, and overlay a composition grid."
+    />
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="shell">
+      <header class="top">
+        <a class="brand" href="../index.html">TheXcoder</a>
+        <span class="sep" aria-hidden="true"></span>
+        <span class="where">Art</span>
+      </header>
+
+      <p class="eyebrow">Art tools</p>
+      <div class="title-row">
+        <h1>Tone Simplifier</h1>
+        <p class="lede">Squint a photo into clear shapes you can paint.</p>
+      </div>
+
+      <nav class="tools" aria-label="Art tools">
+        <a href="./" aria-current="page">Tone Simplifier</a>
+      </nav>
+
+      <div class="app">
+        <section class="stage" aria-label="Pictures">
+          <button type="button" id="drop" class="drop">
+            <span class="drop-kicker">Photo</span>
+            <span class="drop-title" id="drop-title">Drop a photo here</span>
+            <span class="hints">or click to choose a JPG, PNG, or WebP</span>
+          </button>
+          <input
+            id="file"
+            class="visually-hidden"
+            type="file"
+            accept="image/jpeg,image/png,image/webp,image/*"
+            tabindex="-1"
+          />
+
+          <div id="boards" class="boards" hidden>
+            <figure>
+              <figcaption>Reference</figcaption>
+              <div class="frame">
+                <canvas id="orig"></canvas>
+              </div>
+            </figure>
+            <figure>
+              <figcaption>
+                Study
+                <span id="status" aria-live="polite"></span>
+              </figcaption>
+              <div class="frame study">
+                <canvas id="out"></canvas>
+                <canvas id="grid-layer" class="grid" aria-hidden="true"></canvas>
+              </div>
+              <div id="meter" class="meter" hidden>
+                <span id="meter-bar"></span>
+              </div>
+            </figure>
+          </div>
+
+          <p id="info" class="info"></p>
+          <p id="error" class="error" role="alert" hidden></p>
+        </section>
+
+        <aside class="panel" aria-label="Tone Simplifier controls">
+          <h2>Controls</h2>
+
+          <div class="field">
+            <div class="field-top">
+              <label for="simplify">Simplification</label>
+              <output id="simplify-out" for="simplify">Strong</output>
+            </div>
+            <input id="simplify" type="range" min="0" max="100" value="62" />
+            <p class="hint">Merges detail into bigger shapes.</p>
+          </div>
+
+          <div class="field">
+            <div class="field-top">
+              <label for="steps">Tonal steps</label>
+              <output id="steps-out" for="steps">5 tones</output>
+            </div>
+            <input id="steps" type="range" min="2" max="17" value="5" />
+            <p class="hint">How many values are left to paint. The right end is the full range.</p>
+          </div>
+
+          <div class="field">
+            <div class="field-top">
+              <label for="soften">Softness</label>
+              <output id="soften-out" for="soften">Slight</output>
+            </div>
+            <input id="soften" type="range" min="0" max="100" value="22" />
+            <p class="hint">Rounds the edges between shapes.</p>
+          </div>
+
+          <div class="field">
+            <div class="field-top">
+              <label for="contrast">Contrast</label>
+              <output id="contrast-out" for="contrast">Gentle</output>
+            </div>
+            <input id="contrast" type="range" min="0" max="100" value="38" />
+            <p class="hint">Opens the value range and holds the highlights back a little.</p>
+          </div>
+
+          <fieldset class="mode">
+            <legend>Study</legend>
+            <div class="segmented">
+              <label>
+                <input type="radio" name="mode" value="bw" checked />
+                <span>Black &amp; white</span>
+              </label>
+              <label>
+                <input type="radio" name="mode" value="color" />
+                <span>Color</span>
+              </label>
+            </div>
+          </fieldset>
+
+          <div class="split">
+            <label class="select-field">
+              <span>Grid</span>
+              <select id="grid">
+                <option value="none">No grid</option>
+                <optgroup label="Equal grid">
+                  <option value="2">2 × 2</option>
+                  <option value="3">3 × 3 · thirds</option>
+                  <option value="4">4 × 4</option>
+                  <option value="5">5 × 5</option>
+                  <option value="6">6 × 6</option>
+                  <option value="8">8 × 8</option>
+                </optgroup>
+                <optgroup label="Composition">
+                  <option value="golden">Golden section</option>
+                  <option value="diag">Diagonals</option>
+                  <option value="thirds-diag">Thirds and diagonals</option>
+                </optgroup>
+              </select>
+            </label>
+            <label class="select-field">
+              <span>Lines</span>
+              <select id="ink">
+                <option value="light">Light</option>
+                <option value="dark">Dark</option>
+              </select>
+            </label>
+          </div>
+          <p class="hint">Equal divisions for placing the big shapes.</p>
+
+          <label class="check">
+            <input id="bake" type="checkbox" />
+            <span>Save the grid in the PNG</span>
+          </label>
+
+          <div class="actions">
+            <button type="button" id="save" class="save" disabled>Save PNG</button>
+            <button type="button" id="reset" class="reset">Reset controls</button>
+          </div>
+
+          <details>
+            <summary>How to use</summary>
+            <ol>
+              <li>Drop a photo on the box, or click it. JPG and PNG are the most reliable, in Firefox or Chrome.</li>
+              <li>Simplification pulls the picture into masses, the way squinting does. Tonal steps decides how many of those values remain.</li>
+              <li>Black &amp; white is the value study. Color keeps the hues and only simplifies the light.</li>
+              <li>Choose a grid when you want a check on the composition. Save PNG downloads the study.</li>
+            </ol>
+            <ul>
+              <li>A long edge around 1500–3000 px is plenty. Larger photos are scaled down for speed.</li>
+              <li>Smaller photos stay at their own size, and the smoothing stays lighter so they are not over-blurred.</li>
+              <li>Move tonal steps to the right, Full range, when you want soft grays without hard bands.</li>
+            </ul>
+          </details>
+        </aside>
+      </div>
+
+      <p class="foot">Photos stay in the browser. Nothing is uploaded.</p>
+    </div>
+    <script src="script.js"></script>
+  </body>
+</html>
