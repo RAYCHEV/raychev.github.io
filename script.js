@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   document.querySelectorAll('.card-body').forEach(function (body) {
     var text = body.querySelector(':scope > .card-text');
-    var buttons = body.querySelectorAll(':scope > a.btn');
+    var buttons = body.querySelectorAll(':scope > a.btn, :scope > button.btn');
     var toggle = null;
 
     if (text) {
@@ -48,6 +48,20 @@ document.addEventListener('DOMContentLoaded', function () {
       actions.appendChild(button);
     });
     if (toggle) actions.appendChild(toggle);
+  });
+
+  document.querySelectorAll('[data-pending-approval]').forEach(function (button) {
+    var defaultLabel = button.textContent;
+    var resetTimer = null;
+
+    button.addEventListener('click', function () {
+      button.textContent = 'Pending approval';
+      if (resetTimer) clearTimeout(resetTimer);
+      resetTimer = setTimeout(function () {
+        button.textContent = defaultLabel;
+        resetTimer = null;
+      }, 2500);
+    });
   });
 
   document.querySelectorAll('.project-image').forEach(function (image) {
