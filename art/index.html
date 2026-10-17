@@ -47,7 +47,15 @@
           <div id="boards" class="boards" hidden>
             <figure>
               <figcaption>Reference</figcaption>
-              <div class="frame">
+              <div
+                class="frame"
+                id="orig-frame"
+                data-expand
+                tabindex="0"
+                role="button"
+                aria-expanded="false"
+                aria-label="Show the reference fullscreen"
+              >
                 <canvas id="orig"></canvas>
               </div>
             </figure>
@@ -56,9 +64,19 @@
                 Study
                 <span id="status" aria-live="polite"></span>
               </figcaption>
-              <div class="frame study">
-                <canvas id="out"></canvas>
-                <canvas id="grid-layer" class="grid" aria-hidden="true"></canvas>
+              <div
+                class="frame"
+                id="study-frame"
+                data-expand
+                tabindex="0"
+                role="button"
+                aria-expanded="false"
+                aria-label="Show the study fullscreen"
+              >
+                <div class="study">
+                  <canvas id="out"></canvas>
+                  <canvas id="grid-layer" class="grid" aria-hidden="true"></canvas>
+                </div>
               </div>
               <div id="meter" class="meter" hidden>
                 <span id="meter-bar"></span>
@@ -170,6 +188,8 @@
               <li>Simplification pulls the picture into masses, the way squinting does. Tonal steps decides how many of those values remain.</li>
               <li>Black &amp; white is the value study. Color keeps the hues and only simplifies the light.</li>
               <li>Choose a grid when you want a check on the composition. Save PNG downloads the study.</li>
+              <li>Click either picture for fullscreen. Press Esc to come back.</li>
+              <li>The photo and these settings stay in this browser, so a reload brings them back.</li>
             </ol>
             <ul>
               <li>A long edge around 1500–3000 px is plenty. Larger photos are scaled down for speed.</li>
@@ -180,7 +200,7 @@
         </aside>
       </div>
 
-      <p class="foot">Photos stay in the browser. Nothing is uploaded.</p>
+      <p class="foot">This browser remembers the photo and the settings. Nothing is uploaded.</p>
     </div>
     <script src="script.js"></script>
   </body>

@@ -461,6 +461,7 @@ function paintOriginal(rgba, w, h) {
   }
   var buf = new Uint8ClampedArray(rgba);
   ui.orig.getContext('2d').putImageData(new ImageData(buf, w, h), 0, 0);
+  rememberRatio(document.getElementById('orig-frame'));
 }
 
 function paintStudy(tone) {
@@ -486,6 +487,7 @@ function paintStudy(tone) {
     ui.out.height = h;
   }
   ui.out.getContext('2d').putImageData(new ImageData(buf, w, h), 0, 0);
+  rememberRatio(document.getElementById('study-frame'));
 }
 
 function drawGrid() {
@@ -640,7 +642,149 @@ function decodeFile(file) {
   });
 }
 
-function adoptImage(decoded, file) {
+var SETTINGS_KEY = 'tone-simplifier-settings';
+var DB_NAME = 'tone-simplifier';
+var DB_STORE = 'photo';
+
+function readSettings() {
+  try {
+    var raw = localStorage.getItem(SETTINGS_KEY);
+    if (!raw) return null;
+    var data = JSON.parse(raw);
+    return data && typeof data === 'object' ? data : null;
+  } catch (err) {
+    return null;
+  }
+}
+
+function writeSettings() {
+  try {
+    localStorage.setItem(SETTINGS_KEY, JSON.stringify({
+      simplify: ui.simplify.value,
+      steps: ui.steps.value,
+      soften: ui.soften.value,
+      contrast: ui.contrast.value,
+      mode: currentMode(),
+      grid: ui.grid.value,
+      ink: ui.ink.value,
+      bake: ui.bake.checked
+    }));
+  } catch (err) {}
+}
+
+function hasOption(select, value) {
+  for (var i = 0; i < select.options.length; i++) {
+    if (select.options[i].value === String(value)) return true;
+  }
+  return false;
+}
+
+function clampSlider(input, value) {
+  if (value == null || value === '') return;
+  var n = Number(value);
+  if (!isFinite(n)) return;
+  var min = Number(input.min);
+  var max = Number(input.max);
+  if (n < min) n = min;
+  if (n > max) n = max;
+  input.value = String(n);
+}
+
+function applySettings(data) {
+  if (!data) return;
+  clampSlider(ui.simplify, data.simplify);
+  clampSlider(ui.steps, data.steps);
+  clampSlider(ui.soften, data.soften);
+  clampSlider(ui.contrast, data.contrast);
+  if (data.mode === 'bw' || data.mode === 'color') {
+    var mode = document.querySelector('input[name="mode"][value="' + data.mode + '"]');
+    if (mode) mode.checked = true;
+  }
+  if (data.grid != null && hasOption(ui.grid, data.grid)) ui.grid.value = String(data.grid);
+  if (data.ink === 'light' || data.ink === 'dark') ui.ink.value = data.ink;
+  if (typeof data.bake === 'boolean') ui.bake.checked = data.bake;
+}
+
+function openDb() {
+  return new Promise(function (resolve, reject) {
+    if (!window.indexedDB) {
+      reject(new Error('no indexedDB'));
+      return;
+    }
+    var req = indexedDB.open(DB_NAME, 1);
+    req.onupgradeneeded = function () {
+      if (!req.result.objectStoreNames.contains(DB_STORE)) {
+        req.result.createObjectStore(DB_STORE);
+      }
+    };
+    req.onsuccess = function () { resolve(req.result); };
+    req.onerror = function () { reject(req.error); };
+  });
+}
+
+function withStore(mode, run) {
+  return openDb().then(function (db) {
+    return new Promise(function (resolve, reject) {
+      var tx = db.transaction(DB_STORE, mode);
+      var result;
+      tx.oncomplete = function () {
+        db.close();
+        resolve(result);
+      };
+      tx.onerror = function () {
+        db.close();
+        reject(tx.error);
+      };
+      tx.onabort = function () {
+        db.close();
+        reject(tx.error || new Error('abort'));
+      };
+      var req = run(tx.objectStore(DB_STORE));
+      if (req) {
+        req.onsuccess = function () { result = req.result; };
+      }
+    });
+  });
+}
+
+function rememberFile(file) {
+  return withStore('readwrite', function (store) {
+    return store.put({
+      blob: file,
+      name: file.name || 'photo',
+      type: file.type || ''
+    }, 'current');
+  }).catch(function () {});
+}
+
+function recallFile() {
+  return withStore('readonly', function (store) {
+    return store.get('current');
+  }).catch(function () { return null; });
+}
+
+function restoreSession() {
+  var token = loadToken;
+  recallFile().then(function (record) {
+    if (!record || !record.blob || token !== loadToken) return;
+    var blob = record.blob;
+    var name = record.name || blob.name || 'photo';
+    var type = record.type || blob.type || 'image/jpeg';
+    var file = blob instanceof File ? blob : new File([blob], name, { type: type });
+    ui.info.textContent = 'Opening…';
+    return decodeFile(file).then(function (decoded) {
+      if (token !== loadToken) return;
+      adoptImage(decoded, file, true);
+    }).catch(function (err) {
+      console.error(err);
+      if (token !== loadToken) return;
+      ui.info.textContent = '';
+      showError('Could not open the saved photo. Try a JPG or PNG.');
+    });
+  }).catch(function () {});
+}
+
+function adoptImage(decoded, file, remembered) {
   state.id += 1;
   state.luma = toLuma(decoded.rgba);
   state.hs = toHsl(decoded.rgba);
@@ -659,6 +803,7 @@ function adoptImage(decoded, file) {
   ui.dropTitle.textContent = 'Replace photo';
   syncControls();
   render();
+  if (!remembered) rememberFile(file);
 }
 
 function handleFile(file) {
@@ -717,6 +862,121 @@ function resetControls() {
     drawGrid();
     scheduleRender(30);
   }
+  writeSettings();
+}
+
+function rememberRatio(frame) {
+  if (!frame) return;
+  var canvas = frame.querySelector('canvas:not(.grid)') || frame.querySelector('canvas');
+  if (!canvas || !canvas.height) return;
+  frame.style.setProperty('--ratio', String(canvas.width / canvas.height));
+}
+
+function fullscreenElement() {
+  return document.fullscreenElement || document.webkitFullscreenElement || null;
+}
+
+function exitFullscreen() {
+  var exit = document.exitFullscreen || document.webkitExitFullscreen;
+  if (exit && fullscreenElement()) {
+    var pending = exit.call(document);
+    if (pending && pending.catch) pending.catch(function () {});
+  }
+}
+
+function openExpanded(frame) {
+  frame.classList.add('is-expanded');
+  frame.setAttribute('aria-expanded', 'true');
+  document.body.classList.add('has-expanded');
+}
+
+function closeExpanded(frame) {
+  frame.classList.remove('is-expanded');
+  frame.setAttribute('aria-expanded', 'false');
+  if (!document.querySelector('.frame.is-expanded')) {
+    document.body.classList.remove('has-expanded');
+  }
+}
+
+function toggleExpand(frame) {
+  var canvas = frame.querySelector('canvas');
+  if (!canvas || !canvas.width || !canvas.height) return;
+  rememberRatio(frame);
+
+  if (fullscreenElement() === frame) {
+    exitFullscreen();
+    return;
+  }
+  if (frame.classList.contains('is-expanded')) {
+    closeExpanded(frame);
+    return;
+  }
+
+  var open = document.querySelector('.frame.is-expanded');
+  if (open) closeExpanded(open);
+
+  var request = frame.requestFullscreen || frame.webkitRequestFullscreen;
+  if (!request) {
+    openExpanded(frame);
+    return;
+  }
+
+  var settled = false;
+  function showFallback() {
+    if (settled || fullscreenElement() === frame) return;
+    settled = true;
+    openExpanded(frame);
+  }
+
+  var pending;
+  try {
+    pending = request.call(frame);
+  } catch (err) {
+    showFallback();
+    return;
+  }
+  if (pending && pending.then) {
+    pending.then(function () {
+      if (fullscreenElement() === frame) settled = true;
+      else showFallback();
+    }).catch(showFallback);
+  } else if (!fullscreenElement()) {
+    showFallback();
+  }
+  setTimeout(showFallback, 250);
+}
+
+function bindExpand(frame) {
+  if (!frame) return;
+  frame.addEventListener('click', function () { toggleExpand(frame); });
+  frame.addEventListener('keydown', function (e) {
+    if (e.key !== 'Enter' && e.key !== ' ') return;
+    e.preventDefault();
+    toggleExpand(frame);
+  });
+}
+
+function onExpandKey(e) {
+  if (e.key !== 'Escape') return;
+  if (fullscreenElement()) {
+    exitFullscreen();
+    return;
+  }
+  var open = document.querySelector('.frame.is-expanded');
+  if (open) closeExpanded(open);
+}
+
+function syncExpandState() {
+  var current = fullscreenElement();
+  if (current) {
+    var overlay = document.querySelector('.frame.is-expanded');
+    if (overlay) closeExpanded(overlay);
+  }
+  var frames = document.querySelectorAll('[data-expand]');
+  for (var i = 0; i < frames.length; i++) {
+    if (frames[i].classList.contains('is-expanded')) continue;
+    frames[i].setAttribute('aria-expanded', frames[i] === current ? 'true' : 'false');
+  }
 }
 
 function init() {
@@ -746,6 +1006,7 @@ function init() {
   ui.ink = document.getElementById('ink');
   ui.bake = document.getElementById('bake');
 
+  applySettings(readSettings());
   syncControls();
 
   ui.drop.addEventListener('click', function () { ui.file.click(); });
@@ -784,37 +1045,51 @@ function init() {
 
   ui.simplify.addEventListener('input', function () {
     syncControls();
+    writeSettings();
     scheduleRender(80);
   });
   ui.contrast.addEventListener('input', function () {
     syncControls();
+    writeSettings();
     scheduleRender(80);
   });
   ui.steps.addEventListener('input', function () {
     syncControls();
+    writeSettings();
     scheduleRender(40);
   });
   ui.soften.addEventListener('input', function () {
     syncControls();
+    writeSettings();
     scheduleRender(40);
   });
 
   var modes = document.querySelectorAll('input[name="mode"]');
   for (var i = 0; i < modes.length; i++) {
     modes[i].addEventListener('change', function () {
+      writeSettings();
       if (state.luma) scheduleRender(20);
     });
   }
 
   function redrawGridOnly() {
     syncControls();
+    writeSettings();
     if (ui.out.width) drawGrid();
   }
   ui.grid.addEventListener('change', redrawGridOnly);
   ui.ink.addEventListener('change', redrawGridOnly);
+  ui.bake.addEventListener('change', writeSettings);
 
   ui.save.addEventListener('click', savePng);
   ui.reset.addEventListener('click', resetControls);
+
+  bindExpand(document.getElementById('orig-frame'));
+  bindExpand(document.getElementById('study-frame'));
+  document.addEventListener('keydown', onExpandKey);
+  document.addEventListener('fullscreenchange', syncExpandState);
+  document.addEventListener('webkitfullscreenchange', syncExpandState);
+  restoreSession();
 }
 
 if (typeof document !== 'undefined') init();
