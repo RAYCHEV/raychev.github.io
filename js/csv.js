@@ -1,5 +1,7 @@
 document.addEventListener('DOMContentLoaded', function () {
   var THEME_KEY = 'csv-theme';
+  var STATE_KEY = 'csv-editor-state';
+  var saveTimer = null;
   var menu = document.getElementById('csvMenu');
   var menuToggle = document.getElementById('csvMenuToggle');
   var themeButtons = document.querySelectorAll('[data-theme-choice]');
@@ -34,6 +36,85 @@ document.addEventListener('DOMContentLoaded', function () {
     menu.hidden = !open;
     menuToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
     menuToggle.textContent = open ? 'Hide menu' : 'Show menu';
+    scheduleSave();
+  }
+
+  function saveState() {
+    if (saveTimer) {
+      clearTimeout(saveTimer);
+      saveTimer = null;
+    }
+    var payload = {
+      menuOpen: !menu.hidden,
+      fileName: fileName,
+      fileLabel: fileNameLabel && !fileNameLabel.hidden ? fileNameLabel.textContent : '',
+      locked: !!csvData && cellsLocked,
+      selectMode: !!csvData && selectMode,
+      selection: csvData ? selection : {},
+      headers: csvData ? csvData.headers : null,
+      rows: csvData ? csvData.rows : null,
+      widths: csvData ? columnWidths : [],
+      history: csvData ? history : [],
+      historyIndex: csvData ? historyIndex : -1
+    };
+    try {
+      localStorage.setItem(STATE_KEY, JSON.stringify(payload));
+    } catch (err) {
+      payload.history = csvData ? [cloneState()] : [];
+      payload.historyIndex = csvData ? 0 : -1;
+      try {
+        localStorage.setItem(STATE_KEY, JSON.stringify(payload));
+      } catch (ignore) {}
+    }
+  }
+
+  function scheduleSave() {
+    if (saveTimer) clearTimeout(saveTimer);
+    saveTimer = setTimeout(saveState, 150);
+  }
+
+  function restoreSaved() {
+    var raw = null;
+    try {
+      raw = localStorage.getItem(STATE_KEY);
+    } catch (err) {
+      return;
+    }
+    if (!raw) return;
+    var data = null;
+    try {
+      data = JSON.parse(raw);
+    } catch (err) {
+      return;
+    }
+    if (!data || typeof data !== 'object') return;
+    if (data.menuOpen === false) {
+      menu.hidden = true;
+      menuToggle.setAttribute('aria-expanded', 'false');
+      menuToggle.textContent = 'Show menu';
+    }
+    if (!data.headers || !data.rows || !data.headers.length) return;
+    csvData = {
+      headers: data.headers.map(function (header) { return header == null ? '' : String(header); }),
+      rows: data.rows.map(function (row) {
+        return (row || []).map(function (cell) { return cell == null ? '' : String(cell); });
+      })
+    };
+    fileName = data.fileName || 'table.csv';
+    columnWidths = Array.isArray(data.widths) ? data.widths.slice() : [];
+    cellsLocked = !!data.locked;
+    selectMode = !!data.selectMode && cellsLocked;
+    selection = data.selection && typeof data.selection === 'object' ? data.selection : {};
+    history = Array.isArray(data.history) ? data.history : [];
+    historyIndex = typeof data.historyIndex === 'number' ? data.historyIndex : -1;
+    if (!history.length) {
+      history = [cloneState()];
+      historyIndex = 0;
+    }
+    if (historyIndex < 0 || historyIndex >= history.length) historyIndex = history.length - 1;
+    if (data.fileLabel) setChosenFileName(data.fileLabel);
+    renderTable();
+    syncControls();
   }
 
   menuToggle.addEventListener('click', function () {
@@ -41,6 +122,7 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 
   var fileInput = document.getElementById('csvFile');
+  var importAppend = false;
   var fileNameLabel = document.getElementById('csvFileName');
   var newTableButton = document.getElementById('newTable');
   var newTableForm = document.getElementById('newTableForm');
@@ -56,8 +138,7 @@ document.addEventListener('DOMContentLoaded', function () {
   var head = document.getElementById('csvHead');
   var body = document.getElementById('csvBody');
   var summary = document.getElementById('csvSummary');
-  var addRowButton = document.getElementById('addRow');
-  var addColumnButton = document.getElementById('addColumn');
+  var addButton = document.getElementById('addButton');
   var clearButton = document.getElementById('clearCsv');
   var exportButton = document.getElementById('exportCsv');
   var copyTools = document.getElementById('csvCopyTools');
@@ -193,8 +274,8 @@ document.addEventListener('DOMContentLoaded', function () {
     var dirty = isDirty();
     backButton.disabled = !(historyIndex > 0 || dirty);
     forwardButton.disabled = !(!dirty && historyIndex < history.length - 1);
-    clearButton.disabled = !csvData || cellsLocked;
-    copyTools.hidden = !csvData || !cellsLocked;
+    clearButton.disabled = !csvData;
+    copyTools.hidden = !csvData;
     copySelectionButton.disabled = !Object.keys(selection).length;
     selectButton.setAttribute('aria-pressed', selectMode ? 'true' : 'false');
     selectButton.classList.toggle('btn-primary', selectMode);
@@ -206,6 +287,7 @@ document.addEventListener('DOMContentLoaded', function () {
     historyIndex = csvData ? 0 : -1;
     activeCellKey = null;
     syncControls();
+    scheduleSave();
   }
 
   function pushHistory() {
@@ -216,6 +298,7 @@ document.addEventListener('DOMContentLoaded', function () {
     history.push(snap);
     historyIndex = history.length - 1;
     syncControls();
+    scheduleSave();
     return true;
   }
 
@@ -286,6 +369,8 @@ document.addEventListener('DOMContentLoaded', function () {
     setChosenFileName('');
     hideError();
     setNewTableFormOpen(false);
+    setPasteForm(false);
+    setAddMenu(false);
     actions.hidden = true;
     tableWrap.hidden = true;
     emptyBox.hidden = false;
@@ -302,6 +387,7 @@ document.addEventListener('DOMContentLoaded', function () {
     table.style.width = '';
     clearCopyStatus();
     resetHistory();
+    saveState();
   }
 
   function clearCopyStatus() {
@@ -460,21 +546,18 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   function setSelectMode(on) {
-    selectMode = !!on && cellsLocked;
-    if (!selectMode) {
+    if (!csvData) return;
+    if (on) {
+      if (!cellsLocked) commitCellChange();
+      cellsLocked = true;
+      selectMode = true;
+    } else {
+      selectMode = false;
       selection = {};
-      var marked = document.querySelectorAll('.csv-copy-cell.csv-selected');
-      for (var i = 0; i < marked.length; i++) {
-        marked[i].classList.remove('csv-selected');
-        marked[i].setAttribute('aria-pressed', 'false');
-      }
+      cellsLocked = false;
     }
-    if (table) table.classList.toggle('csv-selecting', selectMode);
-    var cells = document.querySelectorAll('.csv-copy-cell');
-    for (var c = 0; c < cells.length; c++) {
-      cells[c].title = selectMode ? 'Select' : 'Copy';
-    }
-    syncControls();
+    clearCopyStatus();
+    renderTable();
   }
 
   function toggleSelected(rowIndex, colIndex, element) {
@@ -530,13 +613,13 @@ document.addEventListener('DOMContentLoaded', function () {
       : 'Lock cells (⌘/⌥ L). A click then copies the cell text.';
     button.appendChild(lockIcon(cellsLocked));
     button.addEventListener('click', function () {
-      if (!cellsLocked) commitCellChange();
-      else setSelectMode(false);
-      cellsLocked = !cellsLocked;
-      if (!cellsLocked) {
-        selectMode = false;
-        selection = {};
+      if (selectMode) {
+        setSelectMode(false);
+        return;
       }
+      if (!cellsLocked) commitCellChange();
+      cellsLocked = !cellsLocked;
+      selection = {};
       clearCopyStatus();
       renderTable();
     });
@@ -638,6 +721,7 @@ document.addEventListener('DOMContentLoaded', function () {
       if (rowIndex < 0) csvData.headers[colIndex] = input.value;
       else csvData.rows[rowIndex][colIndex] = input.value;
       syncControls();
+      scheduleSave();
     });
     input.addEventListener('keydown', function (event) {
       if (event.key !== 'Enter' || rowIndex < 0) return;
@@ -720,6 +804,7 @@ document.addEventListener('DOMContentLoaded', function () {
       total += next;
     });
     table.style.width = total + 'px';
+    scheduleSave();
   }
 
   function resizeHandle(index) {
@@ -870,6 +955,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     activeCellKey = null;
     syncControls();
+    scheduleSave();
     if (focus) focusCell(focus.row, focus.col);
   }
 
@@ -898,7 +984,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (lines.length === 0) {
       showError('The CSV file is empty.');
-      return;
+      return false;
     }
 
     var headers = parseCSVLine(lines[0]).map(function (header, index) {
@@ -908,7 +994,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (headers.length > MAX_COLUMNS) {
       showError('This file has more than ' + MAX_COLUMNS + ' columns.');
-      return;
+      return false;
     }
 
     var rows = lines.slice(1).map(function (line) {
@@ -919,10 +1005,106 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (rows.length > MAX_ROWS) {
       showError('This file has more than ' + MAX_ROWS + ' rows.');
-      return;
+      return false;
     }
 
     openTable(headers, rows, name, true);
+    return true;
+  }
+
+  function headerIndex(name) {
+    var wanted = String(name || '').trim();
+    for (var i = 0; i < csvData.headers.length; i++) {
+      if (csvData.headers[i].trim() === wanted) return i;
+    }
+    return -1;
+  }
+
+  function appendToTable(headers, rows) {
+    var incomingHeaders = headers.map(function (header) { return header.trim(); });
+    var existing = csvData.headers.map(function (header) { return header.trim(); });
+    var matched = 0;
+    incomingHeaders.forEach(function (name) {
+      if (existing.indexOf(name) !== -1) matched += 1;
+    });
+    var useHeader = matched > 0 || incomingHeaders.length !== existing.length;
+    var dataRows = useHeader ? rows.slice() : [headers].concat(rows);
+    var names = useHeader ? incomingHeaders : existing.slice();
+    var extra = [];
+
+    if (useHeader) {
+      names.forEach(function (name) {
+        if (headerIndex(name) === -1 && extra.indexOf(name) === -1) extra.push(name);
+      });
+    }
+
+    if (!dataRows.length && !extra.length) {
+      showError('Nothing new to add.');
+      return false;
+    }
+    if (csvData.rows.length + dataRows.length > MAX_ROWS) {
+      showError('This would be more than ' + MAX_ROWS + ' rows.');
+      return false;
+    }
+    if (csvData.headers.length + extra.length > MAX_COLUMNS) {
+      showError('A table can have up to ' + MAX_COLUMNS + ' columns.');
+      return false;
+    }
+
+    commitCellChange();
+    extra.forEach(function (name) {
+      csvData.headers.push(name);
+      csvData.rows.forEach(function (row) { row.push(''); });
+      columnWidths.push(fitWidth(csvData.headers.length - 1));
+    });
+    dataRows.forEach(function (row) {
+      var aligned = [];
+      var i;
+      for (i = 0; i < csvData.headers.length; i++) aligned.push('');
+      if (useHeader) {
+        names.forEach(function (name, index) {
+          var dest = headerIndex(name);
+          if (dest >= 0) aligned[dest] = row[index] || '';
+        });
+      } else {
+        for (i = 0; i < row.length && i < aligned.length; i++) aligned[i] = row[i] || '';
+      }
+      csvData.rows.push(aligned);
+    });
+    pushHistory();
+    renderTable();
+    hideError();
+    showCopyStatus('Added ' + dataRows.length + (dataRows.length === 1 ? ' row' : ' rows'));
+    return true;
+  }
+
+  function importCsv(text, name, append) {
+    var source = text.replace(/^\uFEFF/, '');
+    var lines = source.split(/\r\n|\n|\r/).filter(function (line) {
+      return line.trim() !== '';
+    });
+
+    if (lines.length === 0) {
+      showError('The CSV file is empty.');
+      return false;
+    }
+
+    var headers = parseCSVLine(lines[0]).map(function (header, index) {
+      var label = header.trim();
+      return label || 'Column ' + (index + 1);
+    });
+    var body = lines.slice(1).map(function (line) {
+      return parseCSVLine(line).map(function (cell) {
+        return cell.trim();
+      });
+    });
+
+    if (!append || !csvData) return parseCSV(text, name);
+    if (headers.length > MAX_COLUMNS) {
+      showError('This file has more than ' + MAX_COLUMNS + ' columns.');
+      return false;
+    }
+    return appendToTable(headers, body);
   }
 
   function defaultHeaders() {
@@ -1062,9 +1244,12 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     var reader = new FileReader();
+    var append = importAppend;
+    importAppend = false;
     reader.onload = function (e) {
+      fileInput.value = '';
       try {
-        parseCSV(String(e.target.result || ''), file.name);
+        importCsv(String(e.target.result || ''), file.name, append);
       } catch (err) {
         showError('Could not read that file.');
       }
@@ -1076,14 +1261,12 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 
   newTableButton.addEventListener('click', function () {
-    var open = newTableForm.hidden;
-    setNewTableFormOpen(open);
-    if (open) columnNamesInput.focus();
+    chooseAdd('new');
   });
 
   cancelNewTableButton.addEventListener('click', function () {
     setNewTableFormOpen(false);
-    newTableButton.focus();
+    addButton.focus();
   });
 
   createTableButton.addEventListener('click', createTable);
@@ -1095,16 +1278,12 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   });
 
-  addRowButton.addEventListener('click', function () {
-    addRow();
-  });
-  addColumnButton.addEventListener('click', addColumn);
   fitColumnsButton.addEventListener('click', fitAllColumns);
   backButton.addEventListener('click', undo);
   forwardButton.addEventListener('click', redo);
   clearButton.addEventListener('click', function () {
-    if (!csvData || cellsLocked) return;
-    if (!window.confirm('Clear this table? This cannot be undone.')) return;
+    if (!csvData) return;
+    if (!window.confirm('Delete this table? This cannot be undone.')) return;
     clearView();
   });
   exportButton.addEventListener('click', downloadCsv);
@@ -1112,7 +1291,6 @@ document.addEventListener('DOMContentLoaded', function () {
     copyWholeTable(copyTableButton);
   });
   selectButton.addEventListener('click', function () {
-    if (!cellsLocked) return;
     setSelectMode(!selectMode);
   });
   copySelectionButton.addEventListener('click', function () {
@@ -1141,6 +1319,8 @@ document.addEventListener('DOMContentLoaded', function () {
     var key = event.key || '';
     if (key === 'l' || key === 'L' || key === 'л' || key === 'Л') return 'l';
     if (key === 'a' || key === 'A' || key === 'а' || key === 'А') return 'a';
+    if (key === 'p' || key === 'P' || key === 'п' || key === 'П') return 'p';
+    if (key === 'б' || key === 'Б') return 'b';
     if (key === 'c' || key === 'C' || key === 'с' || key === 'С') return 'c';
     if (key === 'r' || key === 'R' || key === 'р' || key === 'Р') return 'r';
     if (event.code && /^Key[A-Z]$/.test(event.code)) return event.code.charAt(3).toLowerCase();
@@ -1161,22 +1341,118 @@ document.addEventListener('DOMContentLoaded', function () {
   var addMenu = document.getElementById('addMenu');
   var addMenuRow = document.getElementById('addMenuRow');
   var addMenuColumn = document.getElementById('addMenuColumn');
+  var addMenuPaste = document.getElementById('addMenuPaste');
+  var addMenuFile = document.getElementById('addMenuFile');
+  var newMenu = document.getElementById('newMenu');
+  var newMenuTable = document.getElementById('newMenuTable');
+  var newMenuFile = document.getElementById('newMenuFile');
+  var newMenuPaste = document.getElementById('newMenuPaste');
+  var pasteCsvTitle = document.getElementById('pasteCsvTitle');
+  var pasteReplaces = false;
+  var pasteCsvForm = document.getElementById('pasteCsvForm');
+  var pasteCsvText = document.getElementById('pasteCsvText');
+  var pasteCsvError = document.getElementById('pasteCsvError');
+  var pasteCsvCreate = document.getElementById('pasteCsvCreate');
+  var pasteCsvCancel = document.getElementById('pasteCsvCancel');
+
+  function setPasteForm(open, replace) {
+    pasteCsvForm.hidden = !open;
+    pasteCsvError.hidden = true;
+    pasteCsvError.textContent = '';
+    if (!open) return;
+    pasteReplaces = !!replace;
+    if (pasteCsvTitle) pasteCsvTitle.textContent = pasteReplaces ? 'New table from CSV' : 'Paste CSV';
+    pasteCsvText.value = '';
+    pasteCsvText.focus();
+  }
+
+  function createFromPaste() {
+    var text = pasteCsvText.value;
+    if (!text.trim()) {
+      pasteCsvError.textContent = 'Paste some CSV text first.';
+      pasteCsvError.hidden = false;
+      return;
+    }
+    var append = !pasteReplaces && !!csvData;
+    if (importCsv(text, 'pasted.csv', append)) setPasteForm(false);
+  }
 
   function setAddMenu(open) {
     if (!addMenu) return;
-    if (open && csvData) {
-      var rect = addRowButton.getBoundingClientRect();
-      addMenu.hidden = false;
-      addMenu.style.top = Math.round(rect.bottom + 4) + 'px';
-      addMenu.style.left = Math.round(rect.left) + 'px';
-      addMenuRow.focus();
+    addButton.setAttribute('aria-expanded', open ? 'true' : 'false');
+    if (!open) {
+      addMenu.hidden = true;
+      setNewMenu(false);
       return;
     }
-    addMenu.hidden = true;
+    setNewMenu(false);
+    var rect = addButton.getBoundingClientRect();
+    addMenu.hidden = false;
+    addMenu.style.top = Math.round(rect.bottom + 4) + 'px';
+    addMenu.style.left = Math.round(Math.min(rect.left, window.innerWidth - 200)) + 'px';
+    addMenuRow.disabled = !csvData;
+    addMenuColumn.disabled = !csvData;
+    if (csvData) addMenuRow.focus();
+    else newTableButton.focus();
+  }
+
+  function chooseFile(replace) {
+    importAppend = !replace && !!csvData;
+    fileInput.click();
+  }
+
+  function placeMenu(menu, rect, preferRight) {
+    menu.hidden = false;
+    var width = menu.offsetWidth || 190;
+    var left = preferRight ? rect.right + 4 : rect.left;
+    if (left + width > window.innerWidth - 8) left = Math.max(8, window.innerWidth - width - 8);
+    menu.style.top = Math.round(preferRight ? rect.top : rect.bottom + 4) + 'px';
+    menu.style.left = Math.round(left) + 'px';
+  }
+
+  function setNewMenu(open) {
+    if (!newMenu) return;
+    if (!open) {
+      newMenu.hidden = true;
+      return;
+    }
+    placeMenu(newMenu, newTableButton.getBoundingClientRect(), true);
+    newMenuTable.focus();
+  }
+
+  function chooseNew(kind) {
+    setNewMenu(false);
+    setAddMenu(false);
+    if (kind === 'table') {
+      setPasteForm(false);
+      setNewTableFormOpen(true);
+      columnNamesInput.focus();
+      return;
+    }
+    if (kind === 'file') {
+      chooseFile(true);
+      return;
+    }
+    setPasteForm(true, true);
   }
 
   function chooseAdd(kind) {
+    if (kind === 'new') {
+      if (addMenu.hidden) setAddMenu(true);
+      setNewMenu(newMenu.hidden);
+      return;
+    }
+    setNewMenu(false);
     setAddMenu(false);
+    if (kind === 'paste') {
+      setPasteForm(true, false);
+      return;
+    }
+    if (kind === 'file') {
+      chooseFile(false);
+      return;
+    }
+    if (!csvData) return;
     if (kind === 'column') addColumn();
     else addRow();
   }
@@ -1187,9 +1463,40 @@ document.addEventListener('DOMContentLoaded', function () {
   addMenuColumn.addEventListener('click', function () {
     chooseAdd('column');
   });
+  addMenuPaste.addEventListener('click', function () {
+    chooseAdd('paste');
+  });
+  addMenuFile.addEventListener('click', function () {
+    chooseAdd('file');
+  });
+  newMenuTable.addEventListener('click', function () {
+    chooseNew('table');
+  });
+  newMenuFile.addEventListener('click', function () {
+    chooseNew('file');
+  });
+  newMenuPaste.addEventListener('click', function () {
+    chooseNew('paste');
+  });
+  addButton.addEventListener('click', function () {
+    setAddMenu(addMenu.hidden);
+  });
+  pasteCsvCreate.addEventListener('click', createFromPaste);
+  pasteCsvCancel.addEventListener('click', function () {
+    setPasteForm(false);
+    addButton.focus();
+  });
+  pasteCsvText.addEventListener('keydown', function (event) {
+    if (event.key === 'Enter' && (event.metaKey || event.ctrlKey)) {
+      event.preventDefault();
+      event.stopPropagation();
+      createFromPaste();
+    }
+  });
   document.addEventListener('mousedown', function (event) {
     if (!addMenu || addMenu.hidden) return;
-    if (addMenu.contains(event.target)) return;
+    if (newMenu && newMenu.contains(event.target)) return;
+    if (addMenu.contains(event.target) || addButton.contains(event.target)) return;
     setAddMenu(false);
   });
 
@@ -1198,13 +1505,34 @@ document.addEventListener('DOMContentLoaded', function () {
       document.body.classList.add('csv-keys');
     }
 
+    if (newMenu && !newMenu.hidden) {
+      if (event.key === 'Alt' || event.key === 'Meta' || event.key === 'Shift' || event.key === 'Control') return;
+      event.preventDefault();
+      if (event.repeat) return;
+      var newPick = chordLetter(event);
+      if (newPick === 'n') chooseNew('table');
+      else if (newPick === 'b') chooseNew('file');
+      else if (newPick === 'p') chooseNew('paste');
+      else if (event.key === 'Escape') {
+        setNewMenu(false);
+        newTableButton.focus();
+      } else setNewMenu(false);
+      return;
+    }
+
     if (addMenu && !addMenu.hidden) {
       if (event.key === 'Alt' || event.key === 'Meta' || event.key === 'Shift' || event.key === 'Control') return;
       event.preventDefault();
       if (event.repeat) return;
       var pick = chordLetter(event);
-      if (pick === 'c') chooseAdd('column');
+      if (pick === 'c' && event.shiftKey) {
+        setAddMenu(false);
+        copySelected(copySelectionButton);
+      } else if (pick === 'c') chooseAdd('column');
       else if (pick === 'r') chooseAdd('row');
+      else if (pick === 'b') chooseAdd('file');
+      else if (pick === 'p') chooseAdd('paste');
+      else if (pick === 'n') chooseAdd('new');
       else setAddMenu(false);
       return;
     }
@@ -1221,10 +1549,17 @@ document.addEventListener('DOMContentLoaded', function () {
       }
       if (!newTableForm.hidden) {
         setNewTableFormOpen(false);
-        newTableButton.focus();
+        addButton.focus();
+        return;
+      }
+      if (!pasteCsvForm.hidden) {
+        setPasteForm(false);
+        addButton.focus();
       }
       return;
     }
+
+    if (event.target && event.target.id === 'pasteCsvText') return;
 
     if (event.repeat) return;
 
@@ -1263,6 +1598,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     if (letter === 'b') {
       event.preventDefault();
+      importAppend = !!csvData;
       fileInput.click();
       return;
     }
@@ -1276,13 +1612,13 @@ document.addEventListener('DOMContentLoaded', function () {
       createTable();
       return;
     }
-    if (!csvData) return;
-
     if (letter === 'a') {
       event.preventDefault();
+      setPasteForm(false);
       setAddMenu(addMenu.hidden);
       return;
     }
+    if (!csvData) return;
     if (letter === 'f') {
       event.preventDefault();
       fitAllColumns();
@@ -1294,20 +1630,14 @@ document.addEventListener('DOMContentLoaded', function () {
       else undo();
       return;
     }
-    if (letter === 'e' && !event.shiftKey) {
-      event.preventDefault();
-      downloadCsv();
-      return;
-    }
-    if (event.key === 'Backspace' && !cellsLocked) {
-      event.preventDefault();
-      clearButton.click();
-      return;
-    }
-    if (!cellsLocked) return;
     if (letter === 'e' && event.shiftKey) {
       event.preventDefault();
       copyWholeTable(copyTableButton);
+      return;
+    }
+    if (letter === 'e') {
+      event.preventDefault();
+      downloadCsv();
       return;
     }
     if (letter === 's' && !event.shiftKey) {
@@ -1315,9 +1645,14 @@ document.addEventListener('DOMContentLoaded', function () {
       setSelectMode(!selectMode);
       return;
     }
-    if (letter === 's' && event.shiftKey) {
+    if (letter === 'c' && event.shiftKey) {
       event.preventDefault();
       copySelected(copySelectionButton);
+      return;
+    }
+    if (event.key === 'Backspace') {
+      event.preventDefault();
+      clearButton.click();
     }
   });
 
@@ -1327,4 +1662,6 @@ document.addEventListener('DOMContentLoaded', function () {
   window.addEventListener('blur', function () {
     document.body.classList.remove('csv-keys');
   });
+  window.addEventListener('beforeunload', saveState);
+  restoreSaved();
 });

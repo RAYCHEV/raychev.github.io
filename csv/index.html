@@ -16,12 +16,10 @@
     <div class="csv-shell">
       <header class="csv-top">
         <div class="csv-top-bar navbar navbar-dark bg-dark">
-          <div class="csv-brand">
-            <a class="navbar-brand" href="../index.html">TheXcoder.com</a>
-            <h1 class="csv-title">CSV Tables Editor</h1>
-          </div>
-          <a class="csv-contact" href="../contact.html">Contact</a>
+          <a class="navbar-brand" href="../index.html">TheXcoder.com</a>
+          <h1 class="csv-title">CSV Tables Editor</h1>
           <div class="csv-top-actions">
+            <a class="csv-contact" href="../contact.html">Contact</a>
             <button
               type="button"
               class="btn btn-outline-light btn-sm"
@@ -55,39 +53,34 @@
         </div>
 
         <div id="csvMenu" class="csv-toolbar">
-          <label class="btn btn-outline-primary btn-sm mb-0 csv-browse" for="csvFile" data-key="B">
-            Browse
-            <input
-              type="file"
-              class="sr-only"
-              id="csvFile"
-              accept=".csv,text/csv"
-            />
-          </label>
-          <span id="csvFileName" class="csv-file-name" hidden></span>
+          <input
+            type="file"
+            class="sr-only"
+            id="csvFile"
+            accept=".csv,text/csv"
+          />
           <button
             type="button"
-            class="btn btn-primary btn-sm"
-            id="newTable"
-            data-key="N"
+            class="btn btn-outline-primary btn-sm"
+            id="addButton"
+            data-key="A"
             aria-expanded="false"
-            aria-controls="newTableForm"
+            aria-controls="addMenu"
           >
-            New table
+            Add
           </button>
+          <span id="csvFileName" class="csv-file-name" hidden></span>
 
           <div id="csvActions" hidden>
-            <button type="button" class="btn btn-outline-primary btn-sm" id="addRow" data-key="A">Add row</button>
-            <button type="button" class="btn btn-outline-primary btn-sm" id="addColumn" data-key="A">Add column</button>
             <button type="button" class="btn btn-outline-primary btn-sm" id="fitColumns" data-key="F">Fit columns</button>
             <button type="button" class="btn btn-outline-primary btn-sm" id="historyBack" data-key="Z" disabled>Back</button>
             <button type="button" class="btn btn-outline-primary btn-sm" id="historyForward" data-key="⇧Z" disabled>Forward</button>
-            <button type="button" class="btn btn-secondary btn-sm" id="clearCsv" data-key="⌫">Clear</button>
+            <button type="button" class="btn btn-outline-danger btn-sm" id="clearCsv" data-key="⌫">Delete table</button>
             <button type="button" class="btn btn-primary btn-sm" id="exportCsv" data-key="E">Export CSV</button>
             <div id="csvCopyTools" hidden>
               <button type="button" class="btn btn-outline-primary btn-sm" id="copyTable" data-key="⇧E">Copy table</button>
               <button type="button" class="btn btn-outline-primary btn-sm" id="selectCells" data-key="S" aria-pressed="false">Select</button>
-              <button type="button" class="btn btn-outline-primary btn-sm" id="copySelection" data-key="⇧S" disabled>Copy selected</button>
+              <button type="button" class="btn btn-outline-primary btn-sm" id="copySelection" data-key="⇧C" disabled>Copy selected</button>
             </div>
           </div>
 
@@ -134,20 +127,43 @@
             <li><span>Dark / Light</span><span class="csv-shortcut-keys"><kbd>D</kbd><kbd>⇧D</kbd></span></li>
             <li><span>Browse</span><span class="csv-shortcut-keys"><kbd>B</kbd></span></li>
             <li><span>New table</span><span class="csv-shortcut-keys"><kbd>N</kbd></span></li>
-            <li><span>Add, then row / column</span><span class="csv-shortcut-keys"><kbd>A</kbd><kbd>R</kbd><kbd>C</kbd></span></li>
+            <li><span>Add, then new / row / column / file / paste</span><span class="csv-shortcut-keys"><kbd>A</kbd><kbd>N</kbd><kbd>R</kbd><kbd>C</kbd><kbd>B</kbd><kbd>P</kbd></span></li>
             <li><span>Fit columns</span><span class="csv-shortcut-keys"><kbd>F</kbd></span></li>
             <li><span>Back / Forward</span><span class="csv-shortcut-keys"><kbd>Z</kbd><kbd>⇧Z</kbd></span></li>
-            <li><span>Clear</span><span class="csv-shortcut-keys"><kbd>⌫</kbd></span></li>
+            <li><span>Delete table</span><span class="csv-shortcut-keys"><kbd>⌫</kbd></span></li>
             <li><span>Export</span><span class="csv-shortcut-keys"><kbd>E</kbd></span></li>
             <li><span>Copy table</span><span class="csv-shortcut-keys"><kbd>⇧E</kbd></span></li>
-            <li><span>Select / copy selected</span><span class="csv-shortcut-keys"><kbd>S</kbd><kbd>⇧S</kbd></span></li>
+            <li><span>Select / copy selected</span><span class="csv-shortcut-keys"><kbd>S</kbd><kbd>⇧C</kbd></span></li>
             <li><span>Create / cancel</span><span class="csv-shortcut-keys"><kbd>⏎</kbd><kbd>Esc</kbd></span></li>
           </ul>
-          <p class="csv-shortcuts-note">Cmd or Alt A opens Add. Then R adds a row and C adds a column. While locked, the icon beside a row or column copies it. A cell click copies that cell, unless Select is on.</p>
+          <p class="csv-shortcuts-note">Cmd or Alt A opens Add. N opens New: a blank table, a file that replaces the current one, or pasted CSV that replaces it. B and P on the Add menu add rows to the end. While locked, the icon beside a row or column copies it. A cell click copies that cell, unless Select is on.</p>
+        </div>
+        <div id="pasteCsvForm" class="csv-paste" hidden>
+          <div class="csv-shortcuts-head">
+            <h2 id="pasteCsvTitle">Paste CSV</h2>
+            <button type="button" class="btn btn-sm btn-link" id="pasteCsvCancel">Cancel</button>
+          </div>
+          <textarea
+            id="pasteCsvText"
+            class="form-control"
+            rows="8"
+            placeholder="Name,City&#10;Ada,Sofia"
+            aria-label="CSV text"
+          ></textarea>
+          <p id="pasteCsvError" class="text-danger mb-2" hidden></p>
+          <button type="button" class="btn btn-primary btn-sm" id="pasteCsvCreate">Create table</button>
+        </div>
+        <div id="newMenu" class="csv-add-menu" hidden role="menu" aria-label="New table">
+          <button type="button" role="menuitem" id="newMenuTable">New table <kbd>N</kbd></button>
+          <button type="button" role="menuitem" id="newMenuFile">Browse <kbd>B</kbd></button>
+          <button type="button" role="menuitem" id="newMenuPaste">Paste <kbd>P</kbd></button>
         </div>
         <div id="addMenu" class="csv-add-menu" hidden role="menu" aria-label="Add">
+          <button type="button" role="menuitem" id="newTable" aria-haspopup="menu" aria-controls="newMenu">New <kbd>N</kbd></button>
           <button type="button" role="menuitem" id="addMenuRow">Row <kbd>R</kbd></button>
           <button type="button" role="menuitem" id="addMenuColumn">Column <kbd>C</kbd></button>
+          <button type="button" role="menuitem" id="addMenuFile">Browse <kbd>B</kbd></button>
+          <button type="button" role="menuitem" id="addMenuPaste">Paste CSV <kbd>P</kbd></button>
         </div>
       </header>
 
@@ -155,7 +171,7 @@
         <div id="csvError" class="alert alert-danger mb-0" role="alert" hidden></div>
 
         <div id="csvEmpty" class="alert alert-info mb-0" role="alert">
-          Upload a CSV file, or create a new table and type the cells yourself.
+          Use Add to start a new table, browse a file, or paste CSV.
         </div>
 
         <div id="csvTableWrap" class="csv-table-panel" hidden>
