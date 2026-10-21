@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CSV Tables Editor — Software Developer Portfolio</title>
+    <meta
+      name="description"
+      content="Upload a CSV file or start a new table, edit the cells, and export it again."
+    />
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="../style.css" />
+  </head>
+  <body class="csv-page" data-theme="dark">
+    <div class="csv-shell">
+      <header class="csv-top">
+        <div class="csv-top-bar navbar navbar-dark bg-dark">
+          <a class="navbar-brand" href="../index.html">TheXcoder.com</a>
+          <a class="csv-contact" href="../contact.html">Contact</a>
+          <div class="csv-top-actions">
+            <button
+              type="button"
+              class="btn btn-outline-light btn-sm"
+              id="csvMenuToggle"
+              aria-expanded="true"
+              aria-controls="csvMenu"
+            >
+              Hide menu
+            </button>
+            <div class="btn-group btn-group-sm" role="group" aria-label="Color theme">
+              <button type="button" class="btn btn-primary" id="themeDark" data-theme-choice="dark" aria-pressed="true">
+                Dark
+              </button>
+              <button type="button" class="btn btn-outline-light" id="themeLight" data-theme-choice="light" aria-pressed="false">
+                Light
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div id="csvMenu" class="csv-menu">
+          <h1>CSV Tables Editor</h1>
+          <p class="text-muted">
+            Upload a CSV file, or start a new table if you do not have one yet.
+          </p>
+
+          <div class="mb-3">
+            <div class="form-group mb-2">
+              <label for="csvFile">Upload CSV file</label>
+              <input
+                type="file"
+                class="form-control-file"
+                id="csvFile"
+                accept=".csv,text/csv"
+              />
+            </div>
+            <button
+              type="button"
+              class="btn btn-primary"
+              id="newTable"
+              aria-expanded="false"
+              aria-controls="newTableForm"
+            >
+              New table
+            </button>
+          </div>
+
+          <div id="newTableForm" class="csv-new mb-3" hidden>
+            <h2 class="h5">New table</h2>
+            <div class="form-row">
+              <div class="form-group col-md-8">
+                <label for="columnNames">Column names</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="columnNames"
+                  placeholder="Name, Email, Notes"
+                  autocomplete="off"
+                />
+                <small class="form-text text-muted">
+                  Separate names with commas. Leave this empty for Column 1, Column 2, and Column 3.
+                </small>
+              </div>
+              <div class="form-group col-md-4">
+                <label for="rowCount">Rows</label>
+                <input
+                  type="number"
+                  class="form-control"
+                  id="rowCount"
+                  min="1"
+                  max="200"
+                  value="5"
+                />
+              </div>
+            </div>
+            <p id="newTableError" class="text-danger mb-2" hidden></p>
+            <button type="button" class="btn btn-primary mr-2" id="createTable">Create table</button>
+            <button type="button" class="btn btn-link" id="cancelNewTable">Cancel</button>
+          </div>
+
+          <div id="csvActions" class="csv-actions" hidden>
+            <button type="button" class="btn btn-outline-primary mr-2 mb-2" id="addRow">Add row</button>
+            <button type="button" class="btn btn-outline-primary mr-2 mb-2" id="addColumn">Add column</button>
+            <button type="button" class="btn btn-outline-primary mr-2 mb-2" id="fitColumns">Fit columns</button>
+            <button type="button" class="btn btn-secondary mr-2 mb-2" id="clearCsv">Clear</button>
+            <button type="button" class="btn btn-primary mb-2" id="exportCsv">Export CSV</button>
+          </div>
+        </div>
+      </header>
+
+      <div class="csv-stage">
+        <div id="csvError" class="alert alert-danger mb-0" role="alert" hidden></div>
+
+        <div id="csvEmpty" class="alert alert-info mb-0" role="alert">
+          Upload a CSV file, or create a new table and type the cells yourself.
+        </div>
+
+        <div id="csvTableWrap" class="csv-table-panel" hidden>
+          <div class="csv-scroll" tabindex="0">
+            <table class="table table-bordered table-hover csv-table mb-0">
+              <colgroup id="csvCols"></colgroup>
+              <thead class="thead-dark" id="csvHead"></thead>
+              <tbody id="csvBody"></tbody>
+            </table>
+          </div>
+          <p class="text-muted csv-summary mb-0" id="csvSummary"></p>
+          <p class="csv-copy-status mb-0" id="csvCopyStatus" aria-live="polite"></p>
+        </div>
+      </div>
+    </div>
+
+    <script src="../script.js"></script>
+    <script src="../js/csv.js"></script>
+  </body>
+</html>

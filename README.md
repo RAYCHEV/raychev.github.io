@@ -15,7 +15,7 @@ Pages:
 - `/live-projects/` — redirects to `/`
 - `/discontinued/` — Discontinued (older work and screenshots)
 - `/cv/` — CV
-- `/csv-viewer/` — CSV Viewer
+- `/csv/` — CSV Tables Editor
 - `/contact/` — Contact
 
 ## Deploy
