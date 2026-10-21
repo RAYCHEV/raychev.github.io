@@ -16,96 +16,138 @@
     <div class="csv-shell">
       <header class="csv-top">
         <div class="csv-top-bar navbar navbar-dark bg-dark">
-          <a class="navbar-brand" href="../index.html">TheXcoder.com</a>
+          <div class="csv-brand">
+            <a class="navbar-brand" href="../index.html">TheXcoder.com</a>
+            <h1 class="csv-title">CSV Tables Editor</h1>
+          </div>
           <a class="csv-contact" href="../contact.html">Contact</a>
           <div class="csv-top-actions">
             <button
               type="button"
               class="btn btn-outline-light btn-sm"
+              id="shortcutHelp"
+              data-key="?"
+              aria-expanded="false"
+              aria-controls="shortcutPanel"
+              aria-label="Keyboard shortcuts"
+            >
+              ?
+            </button>
+            <button
+              type="button"
+              class="btn btn-outline-light btn-sm"
               id="csvMenuToggle"
+              data-key="M"
               aria-expanded="true"
               aria-controls="csvMenu"
             >
               Hide menu
             </button>
             <div class="btn-group btn-group-sm" role="group" aria-label="Color theme">
-              <button type="button" class="btn btn-primary" id="themeDark" data-theme-choice="dark" aria-pressed="true">
+              <button type="button" class="btn btn-primary" id="themeDark" data-theme-choice="dark" data-key="D" aria-pressed="true">
                 Dark
               </button>
-              <button type="button" class="btn btn-outline-light" id="themeLight" data-theme-choice="light" aria-pressed="false">
+              <button type="button" class="btn btn-outline-light" id="themeLight" data-theme-choice="light" data-key="⇧D" aria-pressed="false">
                 Light
               </button>
             </div>
           </div>
         </div>
 
-        <div id="csvMenu" class="csv-menu">
-          <h1>CSV Tables Editor</h1>
-          <p class="text-muted">
-            Upload a CSV file, or start a new table if you do not have one yet.
-          </p>
+        <div id="csvMenu" class="csv-toolbar">
+          <label class="btn btn-outline-primary btn-sm mb-0 csv-browse" for="csvFile" data-key="B">
+            Browse
+            <input
+              type="file"
+              class="sr-only"
+              id="csvFile"
+              accept=".csv,text/csv"
+            />
+          </label>
+          <span id="csvFileName" class="csv-file-name" hidden></span>
+          <button
+            type="button"
+            class="btn btn-primary btn-sm"
+            id="newTable"
+            data-key="N"
+            aria-expanded="false"
+            aria-controls="newTableForm"
+          >
+            New table
+          </button>
 
-          <div class="mb-3">
-            <div class="form-group mb-2">
-              <label for="csvFile">Upload CSV file</label>
+          <div id="csvActions" hidden>
+            <button type="button" class="btn btn-outline-primary btn-sm" id="addRow" data-key="A">Add row</button>
+            <button type="button" class="btn btn-outline-primary btn-sm" id="addColumn" data-key="A">Add column</button>
+            <button type="button" class="btn btn-outline-primary btn-sm" id="fitColumns" data-key="F">Fit columns</button>
+            <button type="button" class="btn btn-outline-primary btn-sm" id="historyBack" data-key="Z" disabled>Back</button>
+            <button type="button" class="btn btn-outline-primary btn-sm" id="historyForward" data-key="⇧Z" disabled>Forward</button>
+            <button type="button" class="btn btn-secondary btn-sm" id="clearCsv" data-key="⌫">Clear</button>
+            <button type="button" class="btn btn-primary btn-sm" id="exportCsv" data-key="E">Export CSV</button>
+            <div id="csvCopyTools" hidden>
+              <button type="button" class="btn btn-outline-primary btn-sm" id="copyTable" data-key="⇧E">Copy table</button>
+              <button type="button" class="btn btn-outline-primary btn-sm" id="selectCells" data-key="S" aria-pressed="false">Select</button>
+              <button type="button" class="btn btn-outline-primary btn-sm" id="copySelection" data-key="⇧S" disabled>Copy selected</button>
+            </div>
+          </div>
+
+          <div id="newTableForm" class="csv-new-row" hidden>
+            <label class="csv-inline-field" for="columnNames">
+              Columns
               <input
-                type="file"
-                class="form-control-file"
-                id="csvFile"
-                accept=".csv,text/csv"
+                type="text"
+                class="form-control form-control-sm"
+                id="columnNames"
+                placeholder="Name, Email, Notes"
+                title="Separate names with commas. Leave empty for Column 1, Column 2, and Column 3."
+                autocomplete="off"
               />
+            </label>
+            <label class="csv-inline-field csv-inline-rows" for="rowCount">
+              Rows
+              <input
+                type="number"
+                class="form-control form-control-sm"
+                id="rowCount"
+                min="1"
+                max="200"
+                value="5"
+              />
+            </label>
+            <div class="csv-new-actions">
+              <button type="button" class="btn btn-primary btn-sm" id="createTable" data-key="⏎">Create</button>
+              <button type="button" class="btn btn-link btn-sm" id="cancelNewTable" data-key="Esc">Cancel</button>
             </div>
-            <button
-              type="button"
-              class="btn btn-primary"
-              id="newTable"
-              aria-expanded="false"
-              aria-controls="newTableForm"
-            >
-              New table
-            </button>
+            <p id="newTableError" class="text-danger mb-0" hidden></p>
           </div>
-
-          <div id="newTableForm" class="csv-new mb-3" hidden>
-            <h2 class="h5">New table</h2>
-            <div class="form-row">
-              <div class="form-group col-md-8">
-                <label for="columnNames">Column names</label>
-                <input
-                  type="text"
-                  class="form-control"
-                  id="columnNames"
-                  placeholder="Name, Email, Notes"
-                  autocomplete="off"
-                />
-                <small class="form-text text-muted">
-                  Separate names with commas. Leave this empty for Column 1, Column 2, and Column 3.
-                </small>
-              </div>
-              <div class="form-group col-md-4">
-                <label for="rowCount">Rows</label>
-                <input
-                  type="number"
-                  class="form-control"
-                  id="rowCount"
-                  min="1"
-                  max="200"
-                  value="5"
-                />
-              </div>
-            </div>
-            <p id="newTableError" class="text-danger mb-2" hidden></p>
-            <button type="button" class="btn btn-primary mr-2" id="createTable">Create table</button>
-            <button type="button" class="btn btn-link" id="cancelNewTable">Cancel</button>
+        </div>
+        <div id="shortcutPanel" class="csv-shortcuts" hidden role="dialog" aria-labelledby="shortcutTitle">
+          <div class="csv-shortcuts-head">
+            <h2 id="shortcutTitle">Shortcuts</h2>
+            <button type="button" class="btn btn-sm btn-outline-primary" id="shortcutClose">Close</button>
           </div>
-
-          <div id="csvActions" class="csv-actions" hidden>
-            <button type="button" class="btn btn-outline-primary mr-2 mb-2" id="addRow">Add row</button>
-            <button type="button" class="btn btn-outline-primary mr-2 mb-2" id="addColumn">Add column</button>
-            <button type="button" class="btn btn-outline-primary mr-2 mb-2" id="fitColumns">Fit columns</button>
-            <button type="button" class="btn btn-secondary mr-2 mb-2" id="clearCsv">Clear</button>
-            <button type="button" class="btn btn-primary mb-2" id="exportCsv">Export CSV</button>
-          </div>
+          <p class="csv-shortcuts-note">Hold Cmd or Alt and the key shows on each button. Either one works. Lock also accepts Л.</p>
+          <ul>
+            <li><span>Lock or unlock</span><span class="csv-shortcut-keys"><kbd>L</kbd></span></li>
+            <li><span>Shortcuts</span><span class="csv-shortcut-keys"><kbd>?</kbd></span></li>
+            <li><span>Hide or show menu</span><span class="csv-shortcut-keys"><kbd>M</kbd></span></li>
+            <li><span>Dark / Light</span><span class="csv-shortcut-keys"><kbd>D</kbd><kbd>⇧D</kbd></span></li>
+            <li><span>Browse</span><span class="csv-shortcut-keys"><kbd>B</kbd></span></li>
+            <li><span>New table</span><span class="csv-shortcut-keys"><kbd>N</kbd></span></li>
+            <li><span>Add, then row / column</span><span class="csv-shortcut-keys"><kbd>A</kbd><kbd>R</kbd><kbd>C</kbd></span></li>
+            <li><span>Fit columns</span><span class="csv-shortcut-keys"><kbd>F</kbd></span></li>
+            <li><span>Back / Forward</span><span class="csv-shortcut-keys"><kbd>Z</kbd><kbd>⇧Z</kbd></span></li>
+            <li><span>Clear</span><span class="csv-shortcut-keys"><kbd>⌫</kbd></span></li>
+            <li><span>Export</span><span class="csv-shortcut-keys"><kbd>E</kbd></span></li>
+            <li><span>Copy table</span><span class="csv-shortcut-keys"><kbd>⇧E</kbd></span></li>
+            <li><span>Select / copy selected</span><span class="csv-shortcut-keys"><kbd>S</kbd><kbd>⇧S</kbd></span></li>
+            <li><span>Create / cancel</span><span class="csv-shortcut-keys"><kbd>⏎</kbd><kbd>Esc</kbd></span></li>
+          </ul>
+          <p class="csv-shortcuts-note">Cmd or Alt A opens Add. Then R adds a row and C adds a column. While locked, the icon beside a row or column copies it. A cell click copies that cell, unless Select is on.</p>
+        </div>
+        <div id="addMenu" class="csv-add-menu" hidden role="menu" aria-label="Add">
+          <button type="button" role="menuitem" id="addMenuRow">Row <kbd>R</kbd></button>
+          <button type="button" role="menuitem" id="addMenuColumn">Column <kbd>C</kbd></button>
         </div>
       </header>
 
@@ -124,8 +166,10 @@
               <tbody id="csvBody"></tbody>
             </table>
           </div>
-          <p class="text-muted csv-summary mb-0" id="csvSummary"></p>
-          <p class="csv-copy-status mb-0" id="csvCopyStatus" aria-live="polite"></p>
+          <div class="csv-status-line">
+            <p class="text-muted csv-summary mb-0" id="csvSummary"></p>
+            <p class="csv-copy-status mb-0" id="csvCopyStatus" aria-live="polite"></p>
+          </div>
         </div>
       </div>
     </div>
