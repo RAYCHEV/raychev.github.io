@@ -4,20 +4,21 @@ document.addEventListener('DOMContentLoaded', function () {
   var saveTimer = null;
   var menu = document.getElementById('csvMenu');
   var menuToggle = document.getElementById('csvMenuToggle');
-  var themeButtons = document.querySelectorAll('[data-theme-choice]');
+  var themeToggle = document.getElementById('themeToggle');
 
   function applyTheme(theme) {
     var next = theme === 'light' ? 'light' : 'dark';
     document.body.setAttribute('data-theme', next);
-    for (var i = 0; i < themeButtons.length; i++) {
-      var selected = themeButtons[i].getAttribute('data-theme-choice') === next;
-      themeButtons[i].classList.toggle('btn-primary', selected);
-      themeButtons[i].classList.toggle('btn-outline-light', !selected);
-      themeButtons[i].setAttribute('aria-pressed', selected ? 'true' : 'false');
-    }
+    themeToggle.textContent = next === 'light' ? 'Light' : 'Dark';
+    themeToggle.setAttribute('aria-pressed', next === 'dark' ? 'true' : 'false');
+    themeToggle.setAttribute('aria-label', next === 'light' ? 'Switch to dark' : 'Switch to light');
     try {
       localStorage.setItem(THEME_KEY, next);
     } catch (err) {}
+  }
+
+  function toggleTheme() {
+    applyTheme(document.body.getAttribute('data-theme') === 'light' ? 'dark' : 'light');
   }
 
   var storedTheme = null;
@@ -26,11 +27,7 @@ document.addEventListener('DOMContentLoaded', function () {
   } catch (err) {}
   applyTheme(storedTheme === 'light' ? 'light' : 'dark');
 
-  for (var t = 0; t < themeButtons.length; t++) {
-    themeButtons[t].addEventListener('click', function (event) {
-      applyTheme(event.currentTarget.getAttribute('data-theme-choice'));
-    });
-  }
+  themeToggle.addEventListener('click', toggleTheme);
 
   function setMenuOpen(open) {
     menu.hidden = !open;
@@ -1012,67 +1009,50 @@ document.addEventListener('DOMContentLoaded', function () {
     return true;
   }
 
-  function headerIndex(name) {
-    var wanted = String(name || '').trim();
-    for (var i = 0; i < csvData.headers.length; i++) {
-      if (csvData.headers[i].trim() === wanted) return i;
-    }
-    return -1;
-  }
-
   function appendToTable(headers, rows) {
-    var incomingHeaders = headers.map(function (header) { return header.trim(); });
-    var existing = csvData.headers.map(function (header) { return header.trim(); });
-    var matched = 0;
-    incomingHeaders.forEach(function (name) {
-      if (existing.indexOf(name) !== -1) matched += 1;
+    var first = headers.map(function (header) { return String(header || '').trim(); });
+    var rest = rows.map(function (row) {
+      return row.map(function (cell) { return cell == null ? '' : String(cell).trim(); });
     });
-    var useHeader = matched > 0 || incomingHeaders.length !== existing.length;
-    var dataRows = useHeader ? rows.slice() : [headers].concat(rows);
-    var names = useHeader ? incomingHeaders : existing.slice();
-    var extra = [];
+    var existing = csvData.headers.map(function (header) { return header.trim(); });
+    var sameHeader = first.length === existing.length && first.every(function (name, index) {
+      return name === existing[index];
+    });
+    var dataRows = sameHeader ? rest : [first].concat(rest);
 
-    if (useHeader) {
-      names.forEach(function (name) {
-        if (headerIndex(name) === -1 && extra.indexOf(name) === -1) extra.push(name);
-      });
+    if (!dataRows.length) {
+      showError('Nothing new to add.');
+      return false;
     }
 
-    if (!dataRows.length && !extra.length) {
-      showError('Nothing new to add.');
+    var width = csvData.headers.length;
+    dataRows.forEach(function (row) {
+      if (row.length > width) width = row.length;
+    });
+    if (width > MAX_COLUMNS) {
+      showError('A table can have up to ' + MAX_COLUMNS + ' columns.');
       return false;
     }
     if (csvData.rows.length + dataRows.length > MAX_ROWS) {
       showError('This would be more than ' + MAX_ROWS + ' rows.');
       return false;
     }
-    if (csvData.headers.length + extra.length > MAX_COLUMNS) {
-      showError('A table can have up to ' + MAX_COLUMNS + ' columns.');
-      return false;
-    }
 
     commitCellChange();
-    extra.forEach(function (name) {
-      csvData.headers.push(name);
+    while (csvData.headers.length < width) {
+      csvData.headers.push('Column ' + (csvData.headers.length + 1));
       csvData.rows.forEach(function (row) { row.push(''); });
       columnWidths.push(fitWidth(csvData.headers.length - 1));
-    });
+    }
     dataRows.forEach(function (row) {
       var aligned = [];
-      var i;
-      for (i = 0; i < csvData.headers.length; i++) aligned.push('');
-      if (useHeader) {
-        names.forEach(function (name, index) {
-          var dest = headerIndex(name);
-          if (dest >= 0) aligned[dest] = row[index] || '';
-        });
-      } else {
-        for (i = 0; i < row.length && i < aligned.length; i++) aligned[i] = row[i] || '';
-      }
+      for (var i = 0; i < csvData.headers.length; i++) aligned.push(row[i] || '');
       csvData.rows.push(aligned);
     });
     pushHistory();
     renderTable();
+    var lastRow = body.lastElementChild;
+    if (lastRow && lastRow.scrollIntoView) lastRow.scrollIntoView({ block: 'nearest' });
     hideError();
     showCopyStatus('Added ' + dataRows.length + (dataRows.length === 1 ? ' row' : ' rows'));
     return true;
@@ -1361,7 +1341,9 @@ document.addEventListener('DOMContentLoaded', function () {
     pasteCsvError.textContent = '';
     if (!open) return;
     pasteReplaces = !!replace;
-    if (pasteCsvTitle) pasteCsvTitle.textContent = pasteReplaces ? 'New table from CSV' : 'Paste CSV';
+    if (pasteCsvTitle) {
+      pasteCsvTitle.textContent = pasteReplaces ? 'New table from CSV' : 'Add below the table';
+    }
     pasteCsvText.value = '';
     pasteCsvText.focus();
   }
@@ -1591,9 +1573,9 @@ document.addEventListener('DOMContentLoaded', function () {
       setMenuOpen(menu.hidden);
       return;
     }
-    if (letter === 'd') {
+    if (letter === 'd' && !event.shiftKey) {
       event.preventDefault();
-      applyTheme(event.shiftKey ? 'light' : 'dark');
+      toggleTheme();
       return;
     }
     if (letter === 'b') {

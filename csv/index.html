@@ -41,14 +41,16 @@
             >
               Hide menu
             </button>
-            <div class="btn-group btn-group-sm" role="group" aria-label="Color theme">
-              <button type="button" class="btn btn-primary" id="themeDark" data-theme-choice="dark" data-key="D" aria-pressed="true">
-                Dark
-              </button>
-              <button type="button" class="btn btn-outline-light" id="themeLight" data-theme-choice="light" data-key="⇧D" aria-pressed="false">
-                Light
-              </button>
-            </div>
+            <button
+              type="button"
+              class="btn btn-outline-light btn-sm"
+              id="themeToggle"
+              data-key="D"
+              aria-pressed="true"
+              aria-label="Switch to light"
+            >
+              Dark
+            </button>
           </div>
         </div>
 
@@ -124,7 +126,7 @@
             <li><span>Lock or unlock</span><span class="csv-shortcut-keys"><kbd>L</kbd></span></li>
             <li><span>Shortcuts</span><span class="csv-shortcut-keys"><kbd>?</kbd></span></li>
             <li><span>Hide or show menu</span><span class="csv-shortcut-keys"><kbd>M</kbd></span></li>
-            <li><span>Dark / Light</span><span class="csv-shortcut-keys"><kbd>D</kbd><kbd>⇧D</kbd></span></li>
+            <li><span>Dark / Light</span><span class="csv-shortcut-keys"><kbd>D</kbd></span></li>
             <li><span>Browse</span><span class="csv-shortcut-keys"><kbd>B</kbd></span></li>
             <li><span>New table</span><span class="csv-shortcut-keys"><kbd>N</kbd></span></li>
             <li><span>Add, then new / row / column / file / paste</span><span class="csv-shortcut-keys"><kbd>A</kbd><kbd>N</kbd><kbd>R</kbd><kbd>C</kbd><kbd>B</kbd><kbd>P</kbd></span></li>
@@ -163,7 +165,7 @@
           <button type="button" role="menuitem" id="addMenuRow">Row <kbd>R</kbd></button>
           <button type="button" role="menuitem" id="addMenuColumn">Column <kbd>C</kbd></button>
           <button type="button" role="menuitem" id="addMenuFile">Browse <kbd>B</kbd></button>
-          <button type="button" role="menuitem" id="addMenuPaste">Paste CSV <kbd>P</kbd></button>
+          <button type="button" role="menuitem" id="addMenuPaste">Paste below <kbd>P</kbd></button>
         </div>
       </header>
 
