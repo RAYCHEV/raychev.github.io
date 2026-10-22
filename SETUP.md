@@ -23,11 +23,11 @@ raychev.github.io/
 ├── cv/                 # CV page
 ├── projects/           # Redirects to /discontinued/
 ├── csv/                # CSV Tables Editor page
+│   └── csv.js
 ├── csv-viewer/         # Redirects to /csv/
 ├── contact/            # Contact page
 ├── style.css
 ├── script.js
-├── js/csv.js
 ├── img/                # Images
 ├── CNAME               # Custom domain
 └── 404.html

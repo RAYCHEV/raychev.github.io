@@ -87,6 +87,15 @@ h1 {
   padding: 15px;                /* Add some padding around the card content */
 }
 
+/* Half the inset between the live-project frame and its content */
+#live-projects .card {
+  padding: 8px;
+}
+
+#live-projects .card-body {
+  padding: 0.625rem;
+}
+
 .card-img-top {
   width: 50px;                  /* Adjust image width as needed */
   height: auto;                 /* Ensure the image maintains aspect ratio */
