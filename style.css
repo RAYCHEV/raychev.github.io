@@ -125,6 +125,10 @@ h1 {
   margin-bottom: 0.75rem;
 }
 
+.app-heading > div {
+  min-width: 0;
+}
+
 .app-heading .card-title,
 .app-heading h1 {
   margin: 0;
