@@ -637,6 +637,37 @@ body.csv-page .csv-summary {
   min-height: 1.7rem;
 }
 
+.csv-table.csv-wrap .csv-copy-cell,
+.csv-table.csv-wrap textarea.csv-cell {
+  overflow: hidden;
+  text-overflow: clip;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  line-height: 1.35;
+  height: auto;
+}
+
+.csv-table.csv-wrap textarea.csv-cell {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  margin: 0;
+  resize: none;
+  min-height: 1.7rem;
+}
+
+.csv-table.csv-wrap .csv-head-cell {
+  align-items: flex-start;
+}
+
+.csv-table.csv-wrap .csv-head-cell textarea.csv-cell {
+  flex: 1 1 auto;
+  width: 100%;
+}
+
 .csv-copy-cell.csv-copied,
 .csv-copy-btn.csv-copied {
   box-shadow: inset 0 0 0 2px #80bdff;
@@ -788,6 +819,18 @@ body.csv-page .csv-table th {
   min-width: 0;
   padding: 0;
   white-space: nowrap;
+}
+
+body.csv-page .csv-table.csv-wrap td,
+body.csv-page .csv-table.csv-wrap th {
+  white-space: normal;
+  vertical-align: top;
+}
+
+body.csv-page .csv-table.csv-wrap .csv-row-actions {
+  white-space: nowrap;
+  vertical-align: top;
+  padding-top: 0.2rem;
 }
 
 body.csv-page .csv-table thead th {

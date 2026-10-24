@@ -75,6 +75,16 @@
 
           <div id="csvActions" hidden>
             <button type="button" class="btn btn-outline-primary btn-sm" id="fitColumns" data-key="F">Fit columns</button>
+            <button
+              type="button"
+              class="btn btn-outline-primary btn-sm"
+              id="wrapText"
+              data-key="⌥W"
+              aria-pressed="false"
+              title="One line per row. Click to wrap text so the whole cell is visible."
+            >
+              Wrap
+            </button>
             <button type="button" class="btn btn-outline-primary btn-sm" id="historyBack" data-key="Z" disabled>Back</button>
             <button type="button" class="btn btn-outline-primary btn-sm" id="historyForward" data-key="⇧Z" disabled>Forward</button>
             <button type="button" class="btn btn-outline-danger btn-sm" id="clearCsv" data-key="⌫">Delete table</button>
@@ -131,6 +141,7 @@
             <li><span>New table</span><span class="csv-shortcut-keys"><kbd>N</kbd></span></li>
             <li><span>Add, then new / row / column / file / paste</span><span class="csv-shortcut-keys"><kbd>A</kbd><kbd>N</kbd><kbd>R</kbd><kbd>C</kbd><kbd>B</kbd><kbd>P</kbd></span></li>
             <li><span>Fit columns</span><span class="csv-shortcut-keys"><kbd>F</kbd></span></li>
+            <li><span>Wrap text</span><span class="csv-shortcut-keys"><kbd>⌥W</kbd></span></li>
             <li><span>Back / Forward</span><span class="csv-shortcut-keys"><kbd>Z</kbd><kbd>⇧Z</kbd></span></li>
             <li><span>Delete table</span><span class="csv-shortcut-keys"><kbd>⌫</kbd></span></li>
             <li><span>Export</span><span class="csv-shortcut-keys"><kbd>E</kbd></span></li>
@@ -138,7 +149,7 @@
             <li><span>Select / copy selected</span><span class="csv-shortcut-keys"><kbd>S</kbd><kbd>⇧C</kbd></span></li>
             <li><span>Create / cancel</span><span class="csv-shortcut-keys"><kbd>⏎</kbd><kbd>Esc</kbd></span></li>
           </ul>
-          <p class="csv-shortcuts-note">Cmd or Alt A opens Add. N opens New: a blank table, a file that replaces the current one, or pasted CSV that replaces it. B and P on the Add menu add rows to the end. While locked, the icon beside a row or column copies it. A cell click copies that cell, unless Select is on.</p>
+          <p class="csv-shortcuts-note">Cmd or Alt A opens Add. N opens New: a blank table, a file that replaces the current one, or pasted CSV that replaces it. B and P on the Add menu add rows to the end. While locked, the icon beside a row or column copies it. A cell click copies that cell, unless Select is on. Alt W wraps cell text and the row grows until everything is visible. Turn Wrap off to keep every row one line high.</p>
         </div>
         <div id="pasteCsvForm" class="csv-paste" hidden>
           <div class="csv-shortcuts-head">
