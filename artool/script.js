@@ -28,7 +28,12 @@ var measure = {
   reference: null,
   lines: [],
   pixelsPerUnit: 0,
-  seq: 0
+  seq: 0,
+  mirror: false
+};
+var picture = {
+  reference: { scale: 1, x: 0, y: 0, shown: true },
+  study: { scale: 1, x: 0, y: 0, shown: true }
 };
 var renderGen = 0;
 var renderTimer = 0;
@@ -44,7 +49,7 @@ var DEFAULTS = {
   mode: 'bw',
   grid: 'none',
   ink: 'light',
-  bake: false
+  gridOn: 'both'
 };
 
 function kernelFromAmount(amount, longEdge) {
@@ -428,7 +433,7 @@ function syncControls() {
   ui.contrastOut.textContent = formatContrast(ui.contrast.value);
   var gridOn = ui.grid.value !== 'none';
   ui.ink.disabled = !gridOn;
-  ui.bake.disabled = !gridOn;
+  if (ui.gridOn) ui.gridOn.disabled = !gridOn;
 }
 
 function formatSize(bytes) {
@@ -502,11 +507,14 @@ function paintStudy(tone) {
   drawMeasures();
 }
 
-function drawGrid() {
-  var w = ui.out.width;
-  var h = ui.out.height;
-  var grid = ui.gridCanvas;
-  if (!w || !h) return;
+function gridShows(board) {
+  if (!ui.grid || ui.grid.value === 'none') return false;
+  var where = ui.gridOn ? ui.gridOn.value : 'both';
+  return where === 'both' || where === board;
+}
+
+function paintGridLayer(grid, w, h) {
+  if (!grid || !w || !h) return;
   if (grid.width !== w || grid.height !== h) {
     grid.width = w;
     grid.height = h;
@@ -553,6 +561,14 @@ function drawGrid() {
   strokeAll(ink, core);
 }
 
+function drawGrid() {
+  if (!state.w || !state.h) return;
+  paintGridLayer(ui.refGrid, state.w, state.h);
+  paintGridLayer(ui.gridCanvas, state.w, state.h);
+  if (ui.refGrid) ui.refGrid.hidden = !gridShows('reference');
+  if (ui.gridCanvas) ui.gridCanvas.hidden = !gridShows('study');
+}
+
 function markPainted() {
   var n = Number(document.documentElement.dataset.paint || 0) + 1;
   document.documentElement.dataset.paint = String(n);
@@ -586,7 +602,7 @@ function render() {
     paintStudy(tone);
     drawGrid();
     hideProgress();
-    ui.save.disabled = false;
+    setSavesEnabled(true);
     writeInfo(k, steps);
     markPainted();
   }
@@ -599,7 +615,7 @@ function render() {
   var preview = steps ? posterize(state.mapped, steps) : state.mapped;
   paintStudy(preview);
   drawGrid();
-  ui.save.disabled = true;
+  setSavesEnabled(false);
   showProgress(0.05);
 
   return requestMedian(state.mapped, state.w, state.h, k, medKey, function (frac) {
@@ -679,7 +695,7 @@ function writeSettings() {
       mode: currentMode(),
       grid: ui.grid.value,
       ink: ui.ink.value,
-      bake: ui.bake.checked
+      gridOn: ui.gridOn.value
     }));
   } catch (err) {}
 }
@@ -714,7 +730,7 @@ function applySettings(data) {
   }
   if (data.grid != null && hasOption(ui.grid, data.grid)) ui.grid.value = String(data.grid);
   if (data.ink === 'light' || data.ink === 'dark') ui.ink.value = data.ink;
-  if (typeof data.bake === 'boolean') ui.bake.checked = data.bake;
+  if (data.gridOn && hasOption(ui.gridOn, data.gridOn)) ui.gridOn.value = data.gridOn;
 }
 
 function openDb() {
@@ -811,7 +827,9 @@ function adoptImage(decoded, file, remembered) {
   state.medianKey = '';
   paintOriginal(decoded.rgba, decoded.w, decoded.h);
   dropMeasures();
+  resetPictureViews();
   ui.boards.hidden = false;
+  if (ui.boardSwitch) ui.boardSwitch.hidden = false;
   ui.drop.classList.add('is-loaded');
   ui.dropTitle.textContent = 'Replace photo';
   syncControls();
@@ -840,24 +858,60 @@ function handleFile(file) {
   });
 }
 
-function downloadName() {
-  var base = (state.fileName || 'tone-simplifier').replace(/\.[^.]+$/, '');
+function downloadName(suffix) {
+  var base = (state.fileName || 'artool').replace(/\.[^.]+$/, '');
   var safe = base.replace(/[^\w\-]+/g, '-').replace(/^-+|-+$/g, '');
-  return (safe || 'tone-simplifier') + '-tones.png';
+  return (safe || 'artool') + suffix;
 }
 
-function savePng() {
-  if (ui.save.disabled || !ui.out.width) return;
+function setSavesEnabled(on) {
+  if (ui.saveReference) ui.saveReference.disabled = !on;
+  if (ui.saveStudy) ui.saveStudy.disabled = !on;
+  if (ui.saveBoth) ui.saveBoth.disabled = !on;
+}
+
+function composeBoard(board) {
+  var base = board === 'study' ? ui.out : ui.orig;
+  var grid = board === 'study' ? ui.gridCanvas : ui.refGrid;
+  var lines = board === 'study' ? ui.studyMeasure : ui.measure;
   var canvas = document.createElement('canvas');
-  canvas.width = ui.out.width;
-  canvas.height = ui.out.height;
+  canvas.width = base.width;
+  canvas.height = base.height;
   var ctx = canvas.getContext('2d');
-  ctx.drawImage(ui.out, 0, 0);
-  if (ui.bake.checked && ui.grid.value !== 'none') ctx.drawImage(ui.gridCanvas, 0, 0);
+  ctx.drawImage(base, 0, 0);
+  if (gridShows(board) && grid && grid.width) ctx.drawImage(grid, 0, 0);
+  if (lines && lines.width) ctx.drawImage(lines, 0, 0);
+  return canvas;
+}
+
+function downloadCanvas(canvas, suffix) {
   var link = document.createElement('a');
-  link.download = downloadName();
+  link.download = downloadName(suffix);
   link.href = canvas.toDataURL('image/png');
   link.click();
+}
+
+function saveBoard(board) {
+  var base = board === 'study' ? ui.out : ui.orig;
+  if (!base || !base.width || (ui.saveBoth && ui.saveBoth.disabled)) return;
+  downloadCanvas(composeBoard(board), board === 'study' ? '-study.png' : '-reference.png');
+}
+
+function saveBoth() {
+  if (!ui.orig || !ui.out || !ui.orig.width || !ui.out.width) return;
+  if (ui.saveBoth && ui.saveBoth.disabled) return;
+  var ref = composeBoard('reference');
+  var study = composeBoard('study');
+  var gap = 24;
+  var canvas = document.createElement('canvas');
+  canvas.width = ref.width + gap + study.width;
+  canvas.height = Math.max(ref.height, study.height);
+  var ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#12110f';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.drawImage(ref, 0, Math.round((canvas.height - ref.height) / 2));
+  ctx.drawImage(study, ref.width + gap, Math.round((canvas.height - study.height) / 2));
+  downloadCanvas(canvas, '-both.png');
 }
 
 function resetControls() {
@@ -867,7 +921,7 @@ function resetControls() {
   ui.contrast.value = DEFAULTS.contrast;
   ui.grid.value = DEFAULTS.grid;
   ui.ink.value = DEFAULTS.ink;
-  ui.bake.checked = DEFAULTS.bake;
+  ui.gridOn.value = DEFAULTS.gridOn;
   var mode = document.querySelector('input[name="mode"][value="' + DEFAULTS.mode + '"]');
   if (mode) mode.checked = true;
   syncControls();
@@ -1083,7 +1137,10 @@ function syncProportions() {
   ui.drawLine.disabled = !hasImage || waiting;
   ui.drawLine.setAttribute('aria-pressed', drawing ? 'true' : 'false');
   ui.drawLine.textContent = drawing ? 'Stop drawing' : 'Draw line';
-  if (ui.copyLines) ui.copyLines.disabled = !hasImage || !(measure.reference || measure.lines.length);
+  if (ui.copyLines) {
+    ui.copyLines.disabled = !hasImage;
+    ui.copyLines.setAttribute('aria-pressed', measure.mirror ? 'true' : 'false');
+  }
   ui.clearLines.disabled = !(measure.reference || measure.lines.length || waiting || measure.anchor);
   if (ui.photo) ui.photo.classList.toggle('is-drawing', drawing);
   if (ui.studyPhoto) ui.studyPhoto.classList.toggle('is-drawing', drawing);
@@ -1169,12 +1226,13 @@ function drawMeasureLayer(layer, board) {
   var bounds = { w: w, h: h };
 
   eachMeasureLine(function (line) {
-    if (line.board !== board) return;
+    if (!measure.mirror && line.board !== board) return;
     var dashed = line === measure.pending;
     paintMeasureLine(ctx, line, line.color || selectedColor(), lineCaption(line), width, radius, font, bounds, dashed);
   });
 
-  if (measure.surface !== board || !measure.anchor) return;
+  if (!measure.anchor) return;
+  if (!measure.mirror && measure.surface !== board) return;
   var color = selectedColor();
   if (measure.hover && !sameMeasurePoint(measure.anchor, measure.hover)) {
     var preview = { a: measure.anchor, b: measure.hover };
@@ -1298,35 +1356,9 @@ function deleteLine(id) {
   drawMeasures();
 }
 
-function sameSegment(a, b) {
-  return (sameMeasurePoint(a.a, b.a) && sameMeasurePoint(a.b, b.b)) ||
-    (sameMeasurePoint(a.a, b.b) && sameMeasurePoint(a.b, b.a));
-}
-
-function copyLinesAcross() {
-  var sources = [];
-  if (measure.reference) sources.push(measure.reference);
-  for (var i = 0; i < measure.lines.length; i++) sources.push(measure.lines[i]);
-  var added = false;
-  for (var s = 0; s < sources.length; s++) {
-    var line = sources[s];
-    var board = line.board === 'study' ? 'reference' : 'study';
-    var exists = false;
-    eachMeasureLine(function (other) {
-      if (other.board === board && sameSegment(other, line)) exists = true;
-    });
-    if (exists) continue;
-    measure.lines.push({
-      id: newLineId(),
-      a: { x: line.a.x, y: line.a.y },
-      b: { x: line.b.x, y: line.b.y },
-      name: line.name,
-      color: line.color,
-      board: board
-    });
-    added = true;
-  }
-  if (!added) return;
+function toggleMirror() {
+  if (!state.w) return;
+  measure.mirror = !measure.mirror;
   syncProportions();
   drawMeasures();
 }
@@ -1469,6 +1501,10 @@ function toggleExpand(frame) {
 function bindExpand(frame) {
   if (!frame) return;
   frame.addEventListener('click', function (e) {
+    if (frame.dataset.panned === '1') {
+      delete frame.dataset.panned;
+      return;
+    }
     if (e.target && e.target.classList && e.target.classList.contains('measure')) return;
     toggleExpand(frame);
   });
@@ -1512,6 +1548,170 @@ function syncExpandState() {
   }
 }
 
+function pictureNode(board) {
+  return board === 'study' ? ui.studyPhoto : ui.photo;
+}
+
+function pictureFrame(board) {
+  return document.getElementById(board === 'study' ? 'study-frame' : 'orig-frame');
+}
+
+function clampPicture(board) {
+  var v = picture[board];
+  var frame = pictureFrame(board);
+  var node = pictureNode(board);
+  if (!frame || !node || !node.offsetWidth) return;
+  var fw = frame.clientWidth;
+  var fh = frame.clientHeight;
+  var iw = node.offsetWidth * v.scale;
+  var ih = node.offsetHeight * v.scale;
+  var originX = node.offsetLeft;
+  var originY = node.offsetTop;
+  if (iw <= fw + 1) v.x = 0;
+  else {
+    var minX = fw - originX - iw;
+    var maxX = -originX;
+    if (v.x < minX) v.x = minX;
+    if (v.x > maxX) v.x = maxX;
+  }
+  if (ih <= fh + 1) v.y = 0;
+  else {
+    var minY = fh - originY - ih;
+    var maxY = -originY;
+    if (v.y < minY) v.y = minY;
+    if (v.y > maxY) v.y = maxY;
+  }
+}
+
+function zoomStep(e) {
+  var dy = e.deltaY;
+  if (e.deltaMode === 1) dy *= 16;
+  else if (e.deltaMode === 2) dy *= 400;
+  if (!dy) return 1;
+  var now = Date.now();
+  var gap = now - (zoomStep.last || 0);
+  zoomStep.last = now;
+  if (gap > 45 && Math.abs(dy) < 80) return dy < 0 ? 1.16 : 1 / 1.16;
+  var mag = -dy * 0.004;
+  if (mag > 0.28) mag = 0.28;
+  if (mag < -0.28) mag = -0.28;
+  return Math.exp(mag);
+}
+
+function applyPictureView(board) {
+  var node = pictureNode(board);
+  var frame = pictureFrame(board);
+  var v = picture[board];
+  if (!node || !v) return;
+  node.style.transform = v.scale === 1 && v.x === 0 && v.y === 0
+    ? ''
+    : 'translate(' + v.x + 'px, ' + v.y + 'px) scale(' + v.scale + ')';
+  if (frame) frame.classList.toggle('is-zoomed', v.scale > 1.001);
+}
+
+function resetPictureViews() {
+  picture.reference = { scale: 1, x: 0, y: 0, shown: true };
+  picture.study = { scale: 1, x: 0, y: 0, shown: true };
+  applyPictureView('reference');
+  applyPictureView('study');
+  syncBoardVisibility();
+}
+
+function syncBoardVisibility() {
+  if (ui.refFigure) ui.refFigure.classList.toggle('is-hidden', !picture.reference.shown);
+  if (ui.studyFigure) ui.studyFigure.classList.toggle('is-hidden', !picture.study.shown);
+  if (ui.showReference) {
+    ui.showReference.setAttribute('aria-pressed', picture.reference.shown ? 'true' : 'false');
+    ui.showReference.disabled = picture.reference.shown && !picture.study.shown;
+  }
+  if (ui.showStudy) {
+    ui.showStudy.setAttribute('aria-pressed', picture.study.shown ? 'true' : 'false');
+    ui.showStudy.disabled = picture.study.shown && !picture.reference.shown;
+  }
+}
+
+function setBoardShown(board, shown) {
+  var other = board === 'study' ? 'reference' : 'study';
+  if (!shown && !picture[other].shown) return;
+  if (!shown) {
+    var frame = pictureFrame(board);
+    if (frame && frame.classList.contains('is-expanded')) closeExpanded(frame);
+    if (frame && fullscreenElement() === frame) exitFullscreen();
+  }
+  picture[board].shown = shown;
+  syncBoardVisibility();
+}
+
+function zoomPicture(board, e) {
+  var v = picture[board];
+  var frame = pictureFrame(board);
+  var node = pictureNode(board);
+  if (!v || !frame || !node || !state.w) return;
+  var rect = frame.getBoundingClientRect();
+  var cx = e.clientX - rect.left - frame.clientLeft;
+  var cy = e.clientY - rect.top - frame.clientTop;
+  var factor = zoomStep(e);
+  if (!isFinite(factor) || factor === 1) return;
+  var next = v.scale * factor;
+  if (next < 1) next = 1;
+  if (next > 8) next = 8;
+  var originX = node.offsetLeft;
+  var originY = node.offsetTop;
+  var localX = (cx - originX - v.x) / v.scale;
+  var localY = (cy - originY - v.y) / v.scale;
+  v.scale = next;
+  v.x = cx - originX - localX * next;
+  v.y = cy - originY - localY * next;
+  if (v.scale <= 1.001) {
+    v.scale = 1;
+    v.x = 0;
+    v.y = 0;
+  }
+  clampPicture(board);
+  applyPictureView(board);
+}
+
+function bindPictureView(frame, board) {
+  if (!frame) return;
+  var drag = null;
+  frame.addEventListener('pointerdown', function (e) {
+    if (measure.armed || picture[board].scale <= 1.001 || e.button !== 0) return;
+    if (e.target && e.target.classList && e.target.classList.contains('measure')) return;
+    drag = {
+      id: e.pointerId,
+      x: e.clientX,
+      y: e.clientY,
+      ox: picture[board].x,
+      oy: picture[board].y,
+      moved: false
+    };
+    frame.classList.add('is-panning');
+    if (frame.setPointerCapture) {
+      try { frame.setPointerCapture(e.pointerId); } catch (err) {}
+    }
+  });
+  frame.addEventListener('pointermove', function (e) {
+    if (!drag || e.pointerId !== drag.id) return;
+    var dx = e.clientX - drag.x;
+    var dy = e.clientY - drag.y;
+    if (Math.abs(dx) + Math.abs(dy) > 3) drag.moved = true;
+    if (!drag.moved) return;
+    picture[board].x = drag.ox + dx;
+    picture[board].y = drag.oy + dy;
+    clampPicture(board);
+    applyPictureView(board);
+  });
+  function endDrag(e) {
+    if (!drag || (e && e.pointerId !== drag.id)) return;
+    var moved = drag.moved;
+    drag = null;
+    frame.classList.remove('is-panning');
+    if (moved) frame.dataset.panned = '1';
+  }
+  frame.addEventListener('pointerup', endDrag);
+  frame.addEventListener('pointercancel', endDrag);
+}
+
 function bindMeasureLayer(layer) {
   if (!layer) return;
   layer.addEventListener('pointerdown', onMeasureDown);
@@ -1533,8 +1733,16 @@ function init() {
   ui.orig = document.getElementById('orig');
   ui.out = document.getElementById('out');
   ui.gridCanvas = document.getElementById('grid-layer');
+  ui.refGrid = document.getElementById('ref-grid');
   ui.boards = document.getElementById('boards');
-  ui.save = document.getElementById('save');
+  ui.boardSwitch = document.getElementById('board-switch');
+  ui.refFigure = document.getElementById('ref-figure');
+  ui.studyFigure = document.getElementById('study-figure');
+  ui.showReference = document.getElementById('show-reference');
+  ui.showStudy = document.getElementById('show-study');
+  ui.saveReference = document.getElementById('save-reference');
+  ui.saveStudy = document.getElementById('save-study');
+  ui.saveBoth = document.getElementById('save-both');
   ui.reset = document.getElementById('reset');
   ui.info = document.getElementById('info');
   ui.error = document.getElementById('error');
@@ -1551,7 +1759,7 @@ function init() {
   ui.contrastOut = document.getElementById('contrast-out');
   ui.grid = document.getElementById('grid');
   ui.ink = document.getElementById('ink');
-  ui.bake = document.getElementById('bake');
+  ui.gridOn = document.getElementById('grid-on');
   ui.photo = document.getElementById('photo');
   ui.studyPhoto = document.getElementById('study-photo');
   ui.measure = document.getElementById('measure-layer');
@@ -1633,16 +1841,24 @@ function init() {
   function redrawGridOnly() {
     syncControls();
     writeSettings();
-    if (ui.out.width) drawGrid();
+    if (state.w) drawGrid();
   }
   ui.grid.addEventListener('change', redrawGridOnly);
   ui.ink.addEventListener('change', redrawGridOnly);
-  ui.bake.addEventListener('change', writeSettings);
+  ui.gridOn.addEventListener('change', redrawGridOnly);
 
-  ui.save.addEventListener('click', savePng);
+  ui.saveReference.addEventListener('click', function () { saveBoard('reference'); });
+  ui.saveStudy.addEventListener('click', function () { saveBoard('study'); });
+  ui.saveBoth.addEventListener('click', saveBoth);
+  ui.showReference.addEventListener('click', function () {
+    setBoardShown('reference', !picture.reference.shown);
+  });
+  ui.showStudy.addEventListener('click', function () {
+    setBoardShown('study', !picture.study.shown);
+  });
   ui.reset.addEventListener('click', resetControls);
   ui.drawLine.addEventListener('click', toggleDraw);
-  ui.copyLines.addEventListener('click', copyLinesAcross);
+  ui.copyLines.addEventListener('click', toggleMirror);
   ui.clearLines.addEventListener('click', clearMeasures);
   ui.unit.addEventListener('input', onUnitInput);
   ui.unit.addEventListener('wheel', function (e) { e.preventDefault(); }, { passive: false });
@@ -1658,6 +1874,15 @@ function init() {
 
   bindExpand(document.getElementById('orig-frame'));
   bindExpand(document.getElementById('study-frame'));
+  bindPictureView(document.getElementById('orig-frame'), 'reference');
+  bindPictureView(document.getElementById('study-frame'), 'study');
+  document.addEventListener('wheel', function (e) {
+    if (!e.metaKey && !e.altKey && !e.ctrlKey) return;
+    var node = e.target && e.target.closest ? e.target.closest('.frame') : null;
+    if (!node || !state.w) return;
+    e.preventDefault();
+    zoomPicture(node.id === 'study-frame' ? 'study' : 'reference', e);
+  }, { passive: false, capture: true });
   document.addEventListener('keydown', onExpandKey);
   document.addEventListener('fullscreenchange', syncExpandState);
   document.addEventListener('webkitfullscreenchange', syncExpandState);

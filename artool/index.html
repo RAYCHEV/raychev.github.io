@@ -39,8 +39,13 @@
             tabindex="-1"
           />
 
+          <div class="board-switch" id="board-switch" hidden>
+            <span>Show</span>
+            <button type="button" id="show-reference" class="draw" aria-pressed="true">Reference</button>
+            <button type="button" id="show-study" class="draw" aria-pressed="true">Study</button>
+          </div>
           <div id="boards" class="boards" hidden>
-            <figure>
+            <figure id="ref-figure">
               <figcaption>Reference</figcaption>
               <div
                 class="frame"
@@ -53,11 +58,12 @@
               >
                 <div class="photo" id="photo">
                   <canvas id="orig"></canvas>
+                  <canvas id="ref-grid" class="grid" aria-hidden="true"></canvas>
                   <canvas id="measure-layer" class="measure" data-board="reference" aria-hidden="true"></canvas>
                 </div>
               </div>
             </figure>
-            <figure>
+            <figure id="study-figure">
               <figcaption>
                 Study
                 <span id="status" aria-live="polite"></span>
@@ -88,7 +94,8 @@
         </section>
 
         <aside class="panel" aria-label="Artool controls">
-          <h2>Controls</h2>
+          <details class="fold" open>
+          <summary>Controls</summary>
 
           <div class="field">
             <div class="field-top">
@@ -168,18 +175,23 @@
               </select>
             </label>
           </div>
-          <p class="hint">Equal divisions for placing the big shapes.</p>
-
-          <label class="check">
-            <input id="bake" type="checkbox" />
-            <span>Save the grid in the PNG</span>
+          <label class="select-field" id="grid-where">
+            <span>Show grid on</span>
+            <select id="grid-on">
+              <option value="both">Reference and study</option>
+              <option value="reference">Reference</option>
+              <option value="study">Study</option>
+            </select>
           </label>
+          <p class="hint">Equal divisions for placing the big shapes.</p>
+          </details>
 
-          <fieldset class="proportions">
-            <legend>Proportions</legend>
+          <details class="fold" open>
+          <summary>Proportions</summary>
+          <div class="proportions">
             <p class="hint">
               Click two points on the reference or the study. The first line equals the value below.
-              Every later line is measured against it. Show on both copies the lines onto the other picture.
+              Every later line is measured against it. Show on both keeps each line on both pictures.
             </p>
             <div class="proportion-setup">
               <div class="field">
@@ -196,14 +208,20 @@
             <p class="hint" id="proportion-status" aria-live="polite">Load a photo, then draw on either picture.</p>
             <div class="proportion-actions">
               <button type="button" id="draw-line" class="draw" disabled aria-pressed="false">Draw line</button>
-              <button type="button" id="copy-lines" class="draw" disabled>Show on both</button>
+              <button type="button" id="copy-lines" class="draw" disabled aria-pressed="false">Show on both</button>
             </div>
             <ol id="proportion-list" class="proportion-list" hidden></ol>
             <button type="button" id="clear-lines" class="reset" disabled>Clear lines</button>
-          </fieldset>
+          </div>
+          </details>
 
           <div class="actions">
-            <button type="button" id="save" class="save" disabled>Save PNG</button>
+            <p class="hint">Each file includes the grid and the lines on that picture.</p>
+            <button type="button" id="save-both" class="save" disabled>Save both</button>
+            <div class="save-split">
+              <button type="button" id="save-reference" class="draw" disabled>Reference</button>
+              <button type="button" id="save-study" class="draw" disabled>Study</button>
+            </div>
             <button type="button" id="reset" class="reset">Reset controls</button>
           </div>
 
@@ -213,8 +231,9 @@
               <li>Drop a photo on the box, or click it. JPG and PNG are the most reliable, in Firefox or Chrome.</li>
               <li>Simplification pulls the picture into masses, the way squinting does. Tonal steps decides how many of those values remain.</li>
               <li>Black &amp; white is the value study. Color keeps the hues and only simplifies the light.</li>
-              <li>Choose a grid when you want a check on the composition. Save PNG downloads the study.</li>
-              <li>Proportions: draw a line on the reference or the study and give it a value, such as 1. Later lines show how they compare. Rename a line and the name is drawn on it. Pick a color, or use Show on both to copy the lines onto the other picture. Esc cancels a point before the line is finished.</li>
+              <li>Choose a grid and where it shows: the reference, the study, or both. Save reference, save study, or save both. The file includes the grid and the lines on that picture.</li>
+              <li>Hold Cmd or Alt and scroll to zoom the picture under the pointer. A trackpad pinch does the same. Drag a zoomed picture to move it. Turn Reference or Study off when you only need one.</li>
+              <li>Proportions: draw a line on the reference or the study and give it a value, such as 1. Later lines show how they compare. Rename a line and the name is drawn on it. Turn on Show on both to see every line on both pictures, and turn it off to keep a line where you drew it. Esc cancels a point before the line is finished.</li>
               <li>Click either picture for fullscreen. Press Esc to come back.</li>
               <li>The photo and these settings stay in this browser, so a reload brings them back.</li>
             </ol>

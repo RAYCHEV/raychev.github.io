@@ -106,13 +106,50 @@ h1 {
   padding: 16px 16px 18px;
 }
 
-.panel h2 {
+.fold {
+  margin: 0;
+  color: inherit;
+  font-size: inherit;
+}
+
+.fold + .fold {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+
+.fold > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
   margin: 0 0 14px;
   font-size: 0.78rem;
   font-weight: 600;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--muted);
+  list-style: none;
+}
+
+.fold > summary::-webkit-details-marker { display: none; }
+
+.fold > summary::marker { content: ""; }
+
+.fold > summary::after {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: rotate(45deg) translateY(-2px);
+  flex: none;
+}
+
+.fold:not([open]) > summary { margin-bottom: 0; }
+
+.fold:not([open]) > summary::after {
+  transform: rotate(-45deg);
 }
 
 .drop {
@@ -175,6 +212,27 @@ h1 {
 
 figure { margin: 0; min-width: 0; }
 
+figure.is-hidden { display: none; }
+
+.board-switch {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.board-switch span {
+  color: var(--muted);
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.board-switch .draw { padding: 6px 12px; }
+
+.board-switch .draw:disabled { opacity: 1; cursor: default; }
+
 figcaption {
   display: flex;
   justify-content: space-between;
@@ -189,6 +247,7 @@ figcaption {
 #status { color: var(--gold); letter-spacing: 0.08em; }
 
 .frame {
+  position: relative;
   display: inline-block;
   max-width: 100%;
   background: #0b0b0a;
@@ -210,9 +269,11 @@ figcaption {
   width: fit-content;
   max-width: 100%;
   line-height: 0;
+  transform-origin: 0 0;
 }
 
-.study .grid {
+.study .grid,
+.photo .grid {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -227,6 +288,7 @@ figcaption {
   width: fit-content;
   max-width: 100%;
   line-height: 0;
+  transform-origin: 0 0;
 }
 
 .photo .measure,
@@ -241,8 +303,8 @@ figcaption {
   touch-action: none;
 }
 
-.photo.is-drawing .measure,
-.study.is-drawing .measure {
+.frame .photo.is-drawing .measure,
+.frame .study.is-drawing .measure {
   pointer-events: auto;
   cursor: crosshair;
 }
@@ -318,9 +380,15 @@ figcaption {
   max-height: calc(100vh - 80px);
 }
 
-.frame:fullscreen .photo > canvas:not(.measure),
-.frame:-webkit-full-screen .photo > canvas:not(.measure),
-.frame.is-expanded .photo > canvas:not(.measure) {
+.frame.is-zoomed,
+.frame.is-zoomed canvas { cursor: grab; }
+
+.frame.is-panning,
+.frame.is-panning canvas { cursor: grabbing; }
+
+.frame:fullscreen .photo > canvas:not(.grid):not(.measure),
+.frame:-webkit-full-screen .photo > canvas:not(.grid):not(.measure),
+.frame.is-expanded .photo > canvas:not(.grid):not(.measure) {
   width: 100%;
   height: auto;
   max-width: none;
@@ -483,6 +551,8 @@ input[type="range"]::-moz-range-thumb {
 
 .select-field { display: block; }
 
+#grid-where { margin-top: 12px; }
+
 .select-field span {
   display: block;
   margin-bottom: 6px;
@@ -512,12 +582,9 @@ select:disabled { opacity: 0.45; }
 
 .proportions {
   border: 0;
-  margin: 18px 0 0;
-  padding: 16px 0 0;
-  border-top: 1px solid var(--line);
+  margin: 0;
+  padding: 0;
 }
-
-.proportions legend { margin-bottom: 8px; }
 
 .proportions .field { margin-bottom: 0; }
 
@@ -675,9 +742,17 @@ input[type="color"]:disabled { opacity: 0.45; cursor: not-allowed; }
 .actions {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 8px;
   margin-top: 16px;
 }
+
+.save-split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.save-split .draw { text-align: center; }
 
 .save {
   appearance: none;
