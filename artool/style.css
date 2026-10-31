@@ -73,7 +73,7 @@ button, input, select { font: inherit; color: inherit; }
   flex-wrap: wrap;
   align-items: baseline;
   gap: 8px 22px;
-  margin-top: 6px;
+  margin-top: 28px;
 }
 
 h1 {
@@ -91,30 +91,10 @@ h1 {
   max-width: 28rem;
 }
 
-.tools {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin: 18px 0 22px;
-}
-
-.tools a {
-  color: var(--muted);
-  text-decoration: none;
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  padding: 6px 12px;
-}
-
-.tools a[aria-current="page"] {
-  color: var(--ink);
-  background: rgba(255, 255, 255, 0.06);
-  border-color: transparent;
-}
-
 .app {
   display: grid;
   gap: 22px;
+  margin-top: 22px;
 }
 
 .stage { min-width: 0; }
