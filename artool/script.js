@@ -19,6 +19,17 @@ var state = {
 };
 
 var ui = {};
+var measure = {
+  armed: false,
+  anchor: null,
+  hover: null,
+  pending: null,
+  surface: 'reference',
+  reference: null,
+  lines: [],
+  pixelsPerUnit: 0,
+  seq: 0
+};
 var renderGen = 0;
 var renderTimer = 0;
 var medianSerial = 0;
@@ -488,6 +499,7 @@ function paintStudy(tone) {
   }
   ui.out.getContext('2d').putImageData(new ImageData(buf, w, h), 0, 0);
   rememberRatio(document.getElementById('study-frame'));
+  drawMeasures();
 }
 
 function drawGrid() {
@@ -798,6 +810,7 @@ function adoptImage(decoded, file, remembered) {
   state.median = null;
   state.medianKey = '';
   paintOriginal(decoded.rgba, decoded.w, decoded.h);
+  dropMeasures();
   ui.boards.hidden = false;
   ui.drop.classList.add('is-loaded');
   ui.dropTitle.textContent = 'Replace photo';
@@ -865,9 +878,516 @@ function resetControls() {
   writeSettings();
 }
 
+function measureDistance(a, b) {
+  var dx = b.x - a.x;
+  var dy = b.y - a.y;
+  return Math.sqrt(dx * dx + dy * dy);
+}
+
+function formatMeasure(n) {
+  if (!isFinite(n)) return '—';
+  var text = (Math.round(n * 100) / 100).toFixed(2);
+  return text.replace(/0+$/, '').replace(/\.$/, '');
+}
+
+function readUnit() {
+  var n = parseFloat(ui.unit.value);
+  if (!isFinite(n) || n <= 0) return null;
+  return n;
+}
+
+function imageScale(layer) {
+  var rect = layer && layer.getBoundingClientRect ? layer.getBoundingClientRect() : null;
+  if (!rect || !rect.width || !state.w) return 1;
+  return state.w / rect.width;
+}
+
+function newLineId() {
+  measure.seq += 1;
+  return 'line-' + measure.seq;
+}
+
+function selectedColor() {
+  return (ui.lineColor && ui.lineColor.value) || '#f0c38a';
+}
+
+function boardLabel(board) {
+  return board === 'study' ? 'Study' : 'Reference';
+}
+
+function eachMeasureLine(visit) {
+  if (measure.reference) visit(measure.reference);
+  if (measure.pending && measure.pending !== measure.reference) visit(measure.pending);
+  for (var i = 0; i < measure.lines.length; i++) visit(measure.lines[i]);
+}
+
+function findLine(id) {
+  var found = null;
+  eachMeasureLine(function (line) {
+    if (line.id === id) found = line;
+  });
+  return found;
+}
+
+function haloFor(color) {
+  var hex = String(color || '').replace('#', '');
+  if (hex.length === 3) hex = hex.charAt(0) + hex.charAt(0) + hex.charAt(1) + hex.charAt(1) + hex.charAt(2) + hex.charAt(2);
+  if (hex.length !== 6) return 'rgba(0,0,0,0.62)';
+  var r = parseInt(hex.slice(0, 2), 16);
+  var g = parseInt(hex.slice(2, 4), 16);
+  var b = parseInt(hex.slice(4, 6), 16);
+  if (!isFinite(r) || !isFinite(g) || !isFinite(b)) return 'rgba(0,0,0,0.62)';
+  var y = (r * 299 + g * 587 + b * 114) / 1000;
+  return y > 150 ? 'rgba(0,0,0,0.62)' : 'rgba(255,255,255,0.82)';
+}
+
+function clampImagePoint(point) {
+  return {
+    x: Math.min(state.w, Math.max(0, point.x)),
+    y: Math.min(state.h, Math.max(0, point.y))
+  };
+}
+
+function sameMeasurePoint(a, b) {
+  return Math.abs(a.x - b.x) < 0.5 && Math.abs(a.y - b.y) < 0.5;
+}
+
+function snapMeasurePoint(point, ignore, board, layer) {
+  var radius = 12 * imageScale(layer);
+  var best = null;
+  var bestD = radius;
+  function consider(p) {
+    if (!p || (ignore && sameMeasurePoint(p, ignore))) return;
+    var d = measureDistance(point, p);
+    if (d < bestD) {
+      bestD = d;
+      best = p;
+    }
+  }
+  eachMeasureLine(function (line) {
+    if (line.board !== board) return;
+    consider(line.a);
+    consider(line.b);
+  });
+  return best ? { x: best.x, y: best.y } : point;
+}
+
+function eventImagePoint(e) {
+  var rect = e.currentTarget.getBoundingClientRect();
+  if (!rect.width || !rect.height || !state.w) return { x: 0, y: 0 };
+  return clampImagePoint({
+    x: ((e.clientX - rect.left) / rect.width) * state.w,
+    y: ((e.clientY - rect.top) / rect.height) * state.h
+  });
+}
+
+function lineProportion(line) {
+  if (!measure.pixelsPerUnit) return null;
+  return measureDistance(line.a, line.b) / measure.pixelsPerUnit;
+}
+
+function lineCaption(line) {
+  var valueText = '';
+  if (line === measure.reference) valueText = formatMeasure(line.value);
+  else if (line === measure.pending) {
+    var pendingValue = readUnit();
+    valueText = pendingValue == null ? '' : formatMeasure(pendingValue);
+  } else {
+    var value = lineProportion(line);
+    valueText = value == null ? '' : formatMeasure(value);
+  }
+  var name = line.name ? String(line.name).trim() : '';
+  if (name && valueText) return name + '  ' + valueText;
+  return name || valueText;
+}
+
+function proportionStatus() {
+  if (!state.w) return 'Load a photo, then draw on either picture.';
+  if (measure.pending) return 'Enter a number greater than zero for this line.';
+  if (!measure.reference) {
+    if (measure.anchor) return 'Click the second point.';
+    if (measure.armed) return 'Click the first point on the reference or the study.';
+    return 'Draw a line from point to point. It takes the value above.';
+  }
+  var ref = formatMeasure(measure.reference.value);
+  if (measure.anchor) return 'Click the second point.';
+  if (measure.armed) return 'Click the first point. New lines are measured against ' + ref + '.';
+  return 'Reference is ' + ref + '. Draw another line to compare it.';
+}
+
+function proportionRow(line) {
+  var li = document.createElement('li');
+  var color = document.createElement('input');
+  color.type = 'color';
+  color.className = 'line-color';
+  color.value = line.color || '#f0c38a';
+  color.setAttribute('data-id', line.id);
+  color.setAttribute('aria-label', 'Color');
+
+  var copy = document.createElement('div');
+  copy.className = 'line-copy';
+  var board = document.createElement('span');
+  board.className = 'line-board';
+  board.textContent = boardLabel(line.board);
+  var name = document.createElement('input');
+  name.type = 'text';
+  name.className = 'line-name';
+  name.value = line.name || '';
+  name.maxLength = 40;
+  name.setAttribute('data-id', line.id);
+  name.setAttribute('aria-label', 'Line name');
+  copy.appendChild(board);
+  copy.appendChild(name);
+
+  var value = document.createElement('strong');
+  var shown = line === measure.pending ? readUnit() : (line === measure.reference ? line.value : lineProportion(line));
+  value.textContent = shown == null ? '—' : formatMeasure(shown);
+
+  var remove = document.createElement('button');
+  remove.type = 'button';
+  remove.className = 'line-remove';
+  remove.setAttribute('data-id', line.id);
+  remove.setAttribute('aria-label', 'Remove line');
+  remove.textContent = '×';
+
+  li.appendChild(color);
+  li.appendChild(copy);
+  li.appendChild(value);
+  li.appendChild(remove);
+  return li;
+}
+
+function renderProportionList() {
+  var list = ui.proportionList;
+  if (!list) return;
+  var items = [];
+  if (measure.reference) items.push(measure.reference);
+  if (measure.pending) items.push(measure.pending);
+  for (var i = 0; i < measure.lines.length; i++) items.push(measure.lines[i]);
+  list.textContent = '';
+  if (!items.length) {
+    list.hidden = true;
+    return;
+  }
+  list.hidden = false;
+  for (var n = 0; n < items.length; n++) list.appendChild(proportionRow(items[n]));
+}
+
+function syncProportions() {
+  if (!ui.drawLine) return;
+  var hasImage = !!state.w;
+  var waiting = !!measure.pending;
+  var drawing = !!(measure.armed && !waiting && hasImage);
+  ui.unit.disabled = !hasImage;
+  if (ui.lineColor) ui.lineColor.disabled = !hasImage;
+  ui.drawLine.disabled = !hasImage || waiting;
+  ui.drawLine.setAttribute('aria-pressed', drawing ? 'true' : 'false');
+  ui.drawLine.textContent = drawing ? 'Stop drawing' : 'Draw line';
+  if (ui.copyLines) ui.copyLines.disabled = !hasImage || !(measure.reference || measure.lines.length);
+  ui.clearLines.disabled = !(measure.reference || measure.lines.length || waiting || measure.anchor);
+  if (ui.photo) ui.photo.classList.toggle('is-drawing', drawing);
+  if (ui.studyPhoto) ui.studyPhoto.classList.toggle('is-drawing', drawing);
+  ui.proportionStatus.textContent = proportionStatus();
+  renderProportionList();
+}
+
+function strokeMeasureLine(ctx, a, b, color, width, dashed) {
+  ctx.save();
+  ctx.strokeStyle = color;
+  ctx.lineWidth = width;
+  ctx.lineCap = 'round';
+  ctx.setLineDash(dashed ? [width * 4, width * 3] : []);
+  ctx.beginPath();
+  ctx.moveTo(a.x, a.y);
+  ctx.lineTo(b.x, b.y);
+  ctx.stroke();
+  ctx.restore();
+}
+
+function strokeMeasureDot(ctx, p, color, radius) {
+  ctx.save();
+  ctx.fillStyle = color;
+  ctx.beginPath();
+  ctx.arc(p.x, p.y, radius, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+}
+
+function drawMeasureLabel(ctx, a, b, text, color, font, bounds) {
+  var mx = (a.x + b.x) / 2;
+  var my = (a.y + b.y) / 2;
+  var dx = b.x - a.x;
+  var dy = b.y - a.y;
+  var len = Math.sqrt(dx * dx + dy * dy) || 1;
+  var gap = font * 0.75;
+  var ox = (-dy / len) * gap;
+  var oy = (dx / len) * gap;
+  var x = mx + ox;
+  var y = my + oy;
+  var pad = font * 0.65;
+  if (y < pad || y > bounds.h - pad) {
+    x = mx - ox;
+    y = my - oy;
+  }
+  if (x < pad) x = pad;
+  if (x > bounds.w - pad) x = bounds.w - pad;
+  if (y < pad) y = pad;
+  if (y > bounds.h - pad) y = bounds.h - pad;
+  ctx.save();
+  ctx.font = '600 ' + font + 'px "Avenir Next", "Segoe UI", sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.lineWidth = Math.max(3, font / 5);
+  ctx.strokeStyle = haloFor(color);
+  ctx.strokeText(text, x, y);
+  ctx.fillStyle = color;
+  ctx.fillText(text, x, y);
+  ctx.restore();
+}
+
+function paintMeasureLine(ctx, line, color, label, width, radius, font, bounds, dashed) {
+  strokeMeasureLine(ctx, line.a, line.b, haloFor(color), width + 2, dashed);
+  strokeMeasureLine(ctx, line.a, line.b, color, width, dashed);
+  strokeMeasureDot(ctx, line.a, color, radius);
+  strokeMeasureDot(ctx, line.b, color, radius);
+  if (label) drawMeasureLabel(ctx, line.a, line.b, label, color, font, bounds);
+}
+
+function drawMeasureLayer(layer, board) {
+  if (!layer || !state.w || !state.h) return;
+  var w = state.w;
+  var h = state.h;
+  if (layer.width !== w || layer.height !== h) {
+    layer.width = w;
+    layer.height = h;
+  }
+  var ctx = layer.getContext('2d');
+  ctx.clearRect(0, 0, w, h);
+  var font = Math.max(14, Math.round(Math.min(w, h) / 42));
+  var width = Math.max(2, Math.round(Math.min(w, h) / 280));
+  var radius = Math.max(3, width + 1);
+  var bounds = { w: w, h: h };
+
+  eachMeasureLine(function (line) {
+    if (line.board !== board) return;
+    var dashed = line === measure.pending;
+    paintMeasureLine(ctx, line, line.color || selectedColor(), lineCaption(line), width, radius, font, bounds, dashed);
+  });
+
+  if (measure.surface !== board || !measure.anchor) return;
+  var color = selectedColor();
+  if (measure.hover && !sameMeasurePoint(measure.anchor, measure.hover)) {
+    var preview = { a: measure.anchor, b: measure.hover };
+    var previewLabel = '';
+    if (measure.reference) {
+      var previewValue = lineProportion(preview);
+      if (previewValue != null) previewLabel = formatMeasure(previewValue);
+    }
+    paintMeasureLine(ctx, preview, color, previewLabel, width, radius, font, bounds, true);
+  } else {
+    strokeMeasureDot(ctx, measure.anchor, color, radius);
+  }
+}
+
+function drawMeasures() {
+  drawMeasureLayer(ui.measure, 'reference');
+  drawMeasureLayer(ui.studyMeasure, 'study');
+}
+
+function applyScale(value) {
+  if (!measure.reference || !value) return;
+  var px = measureDistance(measure.reference.a, measure.reference.b);
+  measure.reference.value = value;
+  measure.pixelsPerUnit = px / value;
+}
+
+function commitReference(value) {
+  if (!measure.pending || !value) return;
+  var px = measureDistance(measure.pending.a, measure.pending.b);
+  measure.pending.value = value;
+  measure.reference = measure.pending;
+  measure.pixelsPerUnit = px / value;
+  measure.pending = null;
+  syncProportions();
+  drawMeasures();
+}
+
+function placeMeasurePoint(raw, layer) {
+  var point = snapMeasurePoint(raw, measure.anchor, measure.surface, layer);
+  if (!measure.anchor) {
+    measure.anchor = point;
+    measure.hover = point;
+    syncProportions();
+    drawMeasures();
+    return;
+  }
+  if (measureDistance(measure.anchor, point) < 4) return;
+  var id = newLineId();
+  var line = {
+    id: id,
+    a: measure.anchor,
+    b: point,
+    name: measure.reference ? 'Line ' + measure.seq : 'Reference',
+    color: selectedColor(),
+    board: measure.surface
+  };
+  measure.anchor = null;
+  measure.hover = null;
+  if (!measure.reference) {
+    var value = readUnit();
+    measure.pending = line;
+    if (!value) {
+      syncProportions();
+      drawMeasures();
+      ui.unit.focus();
+      return;
+    }
+    commitReference(value);
+    return;
+  }
+  measure.lines.push(line);
+  syncProportions();
+  drawMeasures();
+}
+
+function onMeasureDown(e) {
+  if (!measure.armed || measure.pending || !state.w) return;
+  if (e.button != null && e.button !== 0) return;
+  var board = e.currentTarget.getAttribute('data-board') || 'reference';
+  e.preventDefault();
+  e.stopPropagation();
+  if (measure.anchor && board !== measure.surface) return;
+  measure.surface = board;
+  if (e.currentTarget.setPointerCapture) {
+    try { e.currentTarget.setPointerCapture(e.pointerId); } catch (err) {}
+  }
+  placeMeasurePoint(eventImagePoint(e), e.currentTarget);
+}
+
+function onMeasureMove(e) {
+  if (!measure.armed || !measure.anchor || measure.pending) return;
+  var board = e.currentTarget.getAttribute('data-board') || 'reference';
+  if (board !== measure.surface) return;
+  measure.hover = snapMeasurePoint(eventImagePoint(e), measure.anchor, board, e.currentTarget);
+  drawMeasures();
+}
+
+function onProportionEdit(e) {
+  var id = e.target.getAttribute('data-id');
+  if (!id) return;
+  var line = findLine(id);
+  if (!line) return;
+  if (e.target.classList.contains('line-name')) line.name = e.target.value;
+  else if (e.target.classList.contains('line-color')) line.color = e.target.value;
+  else return;
+  drawMeasures();
+}
+
+function deleteLine(id) {
+  if (measure.pending && measure.pending.id === id) measure.pending = null;
+  if (measure.reference && measure.reference.id === id) {
+    measure.reference = null;
+    measure.pixelsPerUnit = 0;
+  }
+  var next = [];
+  for (var i = 0; i < measure.lines.length; i++) {
+    if (measure.lines[i].id !== id) next.push(measure.lines[i]);
+  }
+  measure.lines = next;
+  syncProportions();
+  drawMeasures();
+}
+
+function sameSegment(a, b) {
+  return (sameMeasurePoint(a.a, b.a) && sameMeasurePoint(a.b, b.b)) ||
+    (sameMeasurePoint(a.a, b.b) && sameMeasurePoint(a.b, b.a));
+}
+
+function copyLinesAcross() {
+  var sources = [];
+  if (measure.reference) sources.push(measure.reference);
+  for (var i = 0; i < measure.lines.length; i++) sources.push(measure.lines[i]);
+  var added = false;
+  for (var s = 0; s < sources.length; s++) {
+    var line = sources[s];
+    var board = line.board === 'study' ? 'reference' : 'study';
+    var exists = false;
+    eachMeasureLine(function (other) {
+      if (other.board === board && sameSegment(other, line)) exists = true;
+    });
+    if (exists) continue;
+    measure.lines.push({
+      id: newLineId(),
+      a: { x: line.a.x, y: line.a.y },
+      b: { x: line.b.x, y: line.b.y },
+      name: line.name,
+      color: line.color,
+      board: board
+    });
+    added = true;
+  }
+  if (!added) return;
+  syncProportions();
+  drawMeasures();
+}
+
+function onUnitInput() {
+  var value = readUnit();
+  if (measure.pending) {
+    if (value) commitReference(value);
+    else {
+      syncProportions();
+      drawMeasures();
+    }
+    return;
+  }
+  if (measure.reference && value) {
+    applyScale(value);
+    syncProportions();
+    drawMeasures();
+  } else if (measure.reference) {
+    ui.proportionStatus.textContent = 'Enter a number greater than zero.';
+  }
+}
+
+function toggleDraw() {
+  if (!state.w || measure.pending) return;
+  measure.armed = !measure.armed;
+  if (!measure.armed) {
+    measure.anchor = null;
+    measure.hover = null;
+  }
+  syncProportions();
+  drawMeasures();
+}
+
+function clearMeasureGeometry() {
+  measure.armed = false;
+  measure.anchor = null;
+  measure.hover = null;
+  measure.pending = null;
+  measure.surface = 'reference';
+  measure.reference = null;
+  measure.lines = [];
+  measure.pixelsPerUnit = 0;
+}
+
+function clearMeasures() {
+  clearMeasureGeometry();
+  if (ui.unit) ui.unit.value = '1';
+  syncProportions();
+  drawMeasures();
+}
+
+function dropMeasures() {
+  clearMeasureGeometry();
+  syncProportions();
+  drawMeasures();
+}
+
 function rememberRatio(frame) {
   if (!frame) return;
-  var canvas = frame.querySelector('canvas:not(.grid)') || frame.querySelector('canvas');
+  var canvas = frame.querySelector('canvas:not(.grid):not(.measure)');
   if (!canvas || !canvas.height) return;
   frame.style.setProperty('--ratio', String(canvas.width / canvas.height));
 }
@@ -948,7 +1468,10 @@ function toggleExpand(frame) {
 
 function bindExpand(frame) {
   if (!frame) return;
-  frame.addEventListener('click', function () { toggleExpand(frame); });
+  frame.addEventListener('click', function (e) {
+    if (e.target && e.target.classList && e.target.classList.contains('measure')) return;
+    toggleExpand(frame);
+  });
   frame.addEventListener('keydown', function (e) {
     if (e.key !== 'Enter' && e.key !== ' ') return;
     e.preventDefault();
@@ -963,7 +1486,17 @@ function onExpandKey(e) {
     return;
   }
   var open = document.querySelector('.frame.is-expanded');
-  if (open) closeExpanded(open);
+  if (open) {
+    closeExpanded(open);
+    return;
+  }
+  if (!measure.anchor && !measure.pending && !measure.armed) return;
+  measure.anchor = null;
+  measure.hover = null;
+  measure.pending = null;
+  measure.armed = false;
+  syncProportions();
+  drawMeasures();
 }
 
 function syncExpandState() {
@@ -977,6 +1510,20 @@ function syncExpandState() {
     if (frames[i].classList.contains('is-expanded')) continue;
     frames[i].setAttribute('aria-expanded', frames[i] === current ? 'true' : 'false');
   }
+}
+
+function bindMeasureLayer(layer) {
+  if (!layer) return;
+  layer.addEventListener('pointerdown', onMeasureDown);
+  layer.addEventListener('pointermove', onMeasureMove);
+  layer.addEventListener('click', function (e) {
+    if (!measure.armed) return;
+    e.preventDefault();
+    e.stopPropagation();
+  });
+  layer.addEventListener('contextmenu', function (e) {
+    if (measure.armed) e.preventDefault();
+  });
 }
 
 function init() {
@@ -1005,6 +1552,17 @@ function init() {
   ui.grid = document.getElementById('grid');
   ui.ink = document.getElementById('ink');
   ui.bake = document.getElementById('bake');
+  ui.photo = document.getElementById('photo');
+  ui.studyPhoto = document.getElementById('study-photo');
+  ui.measure = document.getElementById('measure-layer');
+  ui.studyMeasure = document.getElementById('study-measure');
+  ui.unit = document.getElementById('unit');
+  ui.lineColor = document.getElementById('line-color');
+  ui.proportionStatus = document.getElementById('proportion-status');
+  ui.drawLine = document.getElementById('draw-line');
+  ui.copyLines = document.getElementById('copy-lines');
+  ui.clearLines = document.getElementById('clear-lines');
+  ui.proportionList = document.getElementById('proportion-list');
 
   applySettings(readSettings());
   syncControls();
@@ -1083,6 +1641,20 @@ function init() {
 
   ui.save.addEventListener('click', savePng);
   ui.reset.addEventListener('click', resetControls);
+  ui.drawLine.addEventListener('click', toggleDraw);
+  ui.copyLines.addEventListener('click', copyLinesAcross);
+  ui.clearLines.addEventListener('click', clearMeasures);
+  ui.unit.addEventListener('input', onUnitInput);
+  ui.unit.addEventListener('wheel', function (e) { e.preventDefault(); }, { passive: false });
+  ui.proportionList.addEventListener('input', onProportionEdit);
+  ui.proportionList.addEventListener('click', function (e) {
+    var button = e.target.closest ? e.target.closest('.line-remove') : null;
+    if (!button) return;
+    deleteLine(button.getAttribute('data-id'));
+  });
+  bindMeasureLayer(ui.measure);
+  bindMeasureLayer(ui.studyMeasure);
+  syncProportions();
 
   bindExpand(document.getElementById('orig-frame'));
   bindExpand(document.getElementById('study-frame'));

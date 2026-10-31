@@ -6,7 +6,7 @@
     <title>Artool</title>
     <meta
       name="description"
-      content="Artool simplifies a photo into paintable value shapes. Set how far the tones merge, switch between black and white and color, and overlay a composition grid."
+      content="Artool simplifies a photo into paintable value shapes. Set how far the tones merge, switch between black and white and color, overlay a composition grid, and measure proportions against a line you set."
     />
     <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
     <link rel="stylesheet" href="style.css" />
@@ -51,7 +51,10 @@
                 aria-expanded="false"
                 aria-label="Show the reference fullscreen"
               >
-                <canvas id="orig"></canvas>
+                <div class="photo" id="photo">
+                  <canvas id="orig"></canvas>
+                  <canvas id="measure-layer" class="measure" data-board="reference" aria-hidden="true"></canvas>
+                </div>
               </div>
             </figure>
             <figure>
@@ -68,9 +71,10 @@
                 aria-expanded="false"
                 aria-label="Show the study fullscreen"
               >
-                <div class="study">
+                <div class="study" id="study-photo">
                   <canvas id="out"></canvas>
                   <canvas id="grid-layer" class="grid" aria-hidden="true"></canvas>
+                  <canvas id="study-measure" class="measure" data-board="study" aria-hidden="true"></canvas>
                 </div>
               </div>
               <div id="meter" class="meter" hidden>
@@ -171,6 +175,33 @@
             <span>Save the grid in the PNG</span>
           </label>
 
+          <fieldset class="proportions">
+            <legend>Proportions</legend>
+            <p class="hint">
+              Click two points on the reference or the study. The first line equals the value below.
+              Every later line is measured against it. Show on both copies the lines onto the other picture.
+            </p>
+            <div class="proportion-setup">
+              <div class="field">
+                <div class="field-top">
+                  <label for="unit">Value</label>
+                </div>
+                <input id="unit" type="number" inputmode="decimal" min="0.01" step="any" value="1" disabled />
+              </div>
+              <label class="color-field">
+                <span>Color</span>
+                <input id="line-color" type="color" value="#f0c38a" disabled />
+              </label>
+            </div>
+            <p class="hint" id="proportion-status" aria-live="polite">Load a photo, then draw on either picture.</p>
+            <div class="proportion-actions">
+              <button type="button" id="draw-line" class="draw" disabled aria-pressed="false">Draw line</button>
+              <button type="button" id="copy-lines" class="draw" disabled>Show on both</button>
+            </div>
+            <ol id="proportion-list" class="proportion-list" hidden></ol>
+            <button type="button" id="clear-lines" class="reset" disabled>Clear lines</button>
+          </fieldset>
+
           <div class="actions">
             <button type="button" id="save" class="save" disabled>Save PNG</button>
             <button type="button" id="reset" class="reset">Reset controls</button>
@@ -183,6 +214,7 @@
               <li>Simplification pulls the picture into masses, the way squinting does. Tonal steps decides how many of those values remain.</li>
               <li>Black &amp; white is the value study. Color keeps the hues and only simplifies the light.</li>
               <li>Choose a grid when you want a check on the composition. Save PNG downloads the study.</li>
+              <li>Proportions: draw a line on the reference or the study and give it a value, such as 1. Later lines show how they compare. Rename a line and the name is drawn on it. Pick a color, or use Show on both to copy the lines onto the other picture. Esc cancels a point before the line is finished.</li>
               <li>Click either picture for fullscreen. Press Esc to come back.</li>
               <li>The photo and these settings stay in this browser, so a reload brings them back.</li>
             </ol>
