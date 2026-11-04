@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Clipnote</title>
+    <meta
+      name="description"
+      content="Paste a note, leave a blank line between blocks, then lock it and tap a block to copy it. Save a copy as an HTML page."
+    />
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header class="bar">
+      <nav class="crumb" aria-label="Breadcrumb">
+        <a class="brand" href="../index.html">TheXcoder</a>
+        <span class="sep" aria-hidden="true">&gt;</span>
+        <span class="here" aria-current="page">Clipnote</span>
+      </nav>
+      <div class="actions">
+        <button type="button" id="open" aria-keyshortcuts="Alt+O">Open <kbd>⌥O</kbd></button>
+        <button type="button" id="save" aria-keyshortcuts="Alt+S">Save HTML <kbd>⌥S</kbd></button>
+        <button type="button" id="lock" aria-keyshortcuts="Alt+L"><span id="lockLabel">Lock</span><kbd>⌥L</kbd></button>
+        <button type="button" id="clear" aria-keyshortcuts="Alt+D"><span id="clearLabel">Delete all</span><kbd>⌥D</kbd></button>
+      </div>
+      <input id="file" class="visually-hidden" type="file" accept="text/plain,.txt,.md,.log,.csv,.html,.htm,text/html" tabindex="-1" aria-hidden="true" />
+    </header>
+
+    <label class="name">
+      <span class="visually-hidden">Short name</span>
+      <input
+        id="title"
+        type="text"
+        maxlength="80"
+        placeholder="Short name"
+        autocomplete="off"
+        spellcheck="false"
+      />
+    </label>
+
+    <p id="hint" class="hint">Lines that follow each other are one block. Leave one blank line between blocks.</p>
+
+    <textarea
+      id="source"
+      spellcheck="true"
+      placeholder="Write a block. Leave one blank line. Then write the next block."
+    ></textarea>
+
+    <div id="sheet" class="sheet" hidden></div>
+    <div id="notice" role="status" aria-live="polite"></div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
