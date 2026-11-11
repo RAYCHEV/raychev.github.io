@@ -916,3 +916,46 @@ body.csv-page[data-theme="dark"] .btn-link {
   white-space: nowrap;
   text-align: center;
 }
+
+.shot-scroller {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  padding: 4px 2px 18px;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+
+.shot-card {
+  flex: 0 0 auto;
+  width: 190px;
+  margin: 0;
+  scroll-snap-align: start;
+}
+
+.shot-card a {
+  display: block;
+  border-radius: 18px;
+  overflow: hidden;
+  background: #efeef3;
+  box-shadow: 0 8px 22px rgba(24, 28, 40, 0.14);
+}
+
+.shot-card img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.shot-card figcaption {
+  margin-top: 8px;
+  color: #495057;
+  font-size: 0.875rem;
+  line-height: 1.35;
+}
+
+@media (max-width: 600px) {
+  .shot-card {
+    width: min(190px, 62vw);
+  }
+}
