@@ -143,149 +143,68 @@
       </p>
 
       <h2 class="mt-4">Screenshots</h2>
-      <p>LocalDrop 1.0.0. Scroll sideways to see the rest.</p>
-      <div class="shot-scroller" tabindex="0" aria-label="LocalDrop screenshots">
-        <figure class="shot-card">
-          <a href="img/screenshots/02-server-active.png">
-            <img
-              src="img/screenshots/02-server-active.png"
-              alt="Home screen with the server running, a local address and a QR code"
-              width="1080"
-              height="2400"
-            />
+      <p>Move through the screens with Previous and Next. Select a picture to open it full size.</p>
+      <div class="shot-viewer" data-shot-viewer>
+        <a class="shot-frame" href="img/screenshots/01-home.png">
+          <img
+            src="img/screenshots/01-home.png"
+            alt="Home screen with the server stopped and Receive Only selected"
+            width="1080"
+            height="2400"
+          />
+        </a>
+        <p class="shot-caption-text" aria-live="polite">
+          Home. The server stays off until you tap Start server.
+        </p>
+        <div class="shot-controls">
+          <button type="button" class="btn btn-outline-primary shot-prev">Previous</button>
+          <span class="shot-count">1 of 11</span>
+          <button type="button" class="btn btn-outline-primary shot-next">Next</button>
+        </div>
+        <div class="shot-thumbs" aria-label="All screenshots">
+          <a href="img/screenshots/01-home.png" data-caption="Home. The server stays off until you tap Start server." aria-current="true">
+            <img src="img/screenshots/01-home.png" alt="Home screen with the server stopped and Receive Only selected" width="1080" height="2400" />
           </a>
-          <figcaption>Start sharing directly over your local network.</figcaption>
-        </figure>
-        <figure class="shot-card">
-          <a href="img/screenshots/05-receive-files.png">
-            <img
-              src="img/screenshots/05-receive-files.png"
-              alt="Inbox with a received image, documents and a link"
-              width="1080"
-              height="2400"
-              loading="lazy"
-              decoding="async"
-            />
+          <a href="img/screenshots/02-server-active.png" data-caption="The server is running. Use the address or the QR code on another device.">
+            <img src="img/screenshots/02-server-active.png" alt="Home screen with the server running, a local address and a QR code" width="1080" height="2400" loading="lazy" decoding="async" />
           </a>
-          <figcaption>Everything received, in one place.</figcaption>
-        </figure>
-        <figure class="shot-card">
-          <a href="img/screenshots/04-send-files.png">
-            <img
-              src="img/screenshots/04-send-files.png"
-              alt="Shared screen with selected files and individual switches"
-              width="1080"
-              height="2400"
-              loading="lazy"
-              decoding="async"
-            />
+          <a href="img/screenshots/03-connection.png" data-caption="The QR code, large enough to scan.">
+            <img src="img/screenshots/03-connection.png" alt="Connect to LocalDrop dialog with a large QR code and the server address" width="1080" height="2400" loading="lazy" decoding="async" />
           </a>
-          <figcaption>Choose exactly which files you share.</figcaption>
-        </figure>
-        <figure class="shot-card">
-          <a href="img/screenshots/09-transfer-progress.png">
-            <img
-              src="img/screenshots/09-transfer-progress.png"
-              alt="Home screen during a file transfer, with progress and a connected device"
-              width="1080"
-              height="2400"
-              loading="lazy"
-              decoding="async"
-            />
+          <a href="img/screenshots/04-send-files.png" data-caption="Shared files. Turn on only the items other devices may download.">
+            <img src="img/screenshots/04-send-files.png" alt="Shared screen with selected files and individual switches" width="1080" height="2400" loading="lazy" decoding="async" />
           </a>
-          <figcaption>See transfer progress as it happens.</figcaption>
-        </figure>
-        <figure class="shot-card">
-          <a href="img/screenshots/03-connection.png">
-            <img
-              src="img/screenshots/03-connection.png"
-              alt="Connect to LocalDrop dialog with a large QR code and the server address"
-              width="1080"
-              height="2400"
-              loading="lazy"
-              decoding="async"
-            />
+          <a href="img/screenshots/09-transfer-progress.png" data-caption="A file moving across, with progress and Cancel.">
+            <img src="img/screenshots/09-transfer-progress.png" alt="Home screen during a file transfer, with progress and a connected device" width="1080" height="2400" loading="lazy" decoding="async" />
           </a>
-          <figcaption>Scan. Connect. Share.</figcaption>
-        </figure>
-        <figure class="shot-card">
-          <a href="img/screenshots/06-share-text.png">
-            <img
-              src="img/screenshots/06-share-text.png"
-              alt="Inbox Text filter with two received notes"
-              width="1080"
-              height="2400"
-              loading="lazy"
-              decoding="async"
-            />
+          <a href="img/screenshots/05-receive-files.png" data-caption="Inbox. Photos, documents and links you received.">
+            <img src="img/screenshots/05-receive-files.png" alt="Inbox with a received image, documents and a link" width="1080" height="2400" loading="lazy" decoding="async" />
           </a>
-          <figcaption>Keep notes moving between your devices.</figcaption>
-        </figure>
-        <figure class="shot-card">
-          <a href="img/screenshots/10-share-links.png">
-            <img
-              src="img/screenshots/10-share-links.png"
-              alt="Inbox Links filter with two received web addresses"
-              width="1080"
-              height="2400"
-              loading="lazy"
-              decoding="async"
-            />
+          <a href="img/screenshots/06-share-text.png" data-caption="Notes other devices sent. Copy or share them.">
+            <img src="img/screenshots/06-share-text.png" alt="Inbox Text filter with two received notes" width="1080" height="2400" loading="lazy" decoding="async" />
           </a>
-          <figcaption>Send links straight to your phone.</figcaption>
-        </figure>
-        <figure class="shot-card">
-          <a href="img/screenshots/08-transfer-history.png">
-            <img
-              src="img/screenshots/08-transfer-history.png"
-              alt="History screen listing successful sent and received transfers"
-              width="1080"
-              height="2400"
-              loading="lazy"
-              decoding="async"
-            />
+          <a href="img/screenshots/10-share-links.png" data-caption="Links other devices sent. Copy one, or open it.">
+            <img src="img/screenshots/10-share-links.png" alt="Inbox Links filter with two received web addresses" width="1080" height="2400" loading="lazy" decoding="async" />
           </a>
-          <figcaption>Keep track of your local transfers.</figcaption>
-        </figure>
-        <figure class="shot-card">
-          <a href="img/screenshots/07-settings.png">
-            <img
-              src="img/screenshots/07-settings.png"
-              alt="Settings for port, background server, auto-stop and transfer mode"
-              width="1080"
-              height="2400"
-              loading="lazy"
-              decoding="async"
-            />
+          <a href="img/screenshots/08-transfer-history.png" data-caption="A record of transfers that finished, failed or were cancelled.">
+            <img src="img/screenshots/08-transfer-history.png" alt="History screen listing successful sent and received transfers" width="1080" height="2400" loading="lazy" decoding="async" />
           </a>
-          <figcaption>Sharing that works your way.</figcaption>
-        </figure>
-        <figure class="shot-card">
-          <a href="img/screenshots/11-security.png">
-            <img
-              src="img/screenshots/11-security.png"
-              alt="Security settings for connection approval, session PIN and a connected device"
-              width="1080"
-              height="2400"
-              loading="lazy"
-              decoding="async"
-            />
+          <a href="img/screenshots/07-settings.png" data-caption="Port, background running, auto-stop and transfer mode.">
+            <img src="img/screenshots/07-settings.png" alt="Settings for port, background server, auto-stop and transfer mode" width="1080" height="2400" loading="lazy" decoding="async" />
           </a>
-          <figcaption>You choose who can connect.</figcaption>
-        </figure>
-        <figure class="shot-card">
-          <a href="img/screenshots/01-home.png">
-            <img
-              src="img/screenshots/01-home.png"
-              alt="Home screen with the server stopped and Receive Only selected"
-              width="1080"
-              height="2400"
-              loading="lazy"
-              decoding="async"
-            />
+          <a href="img/screenshots/11-security.png" data-caption="Connection approval, a session PIN, and the devices connected now.">
+            <img src="img/screenshots/11-security.png" alt="Security settings for connection approval, session PIN and a connected device" width="1080" height="2400" loading="lazy" decoding="async" />
           </a>
-          <figcaption>Your devices. One local connection.</figcaption>
-        </figure>
+        </div>
+      </div>
+      <div class="shot-lightbox" hidden role="dialog" aria-modal="true" aria-label="Screenshot">
+        <button type="button" class="btn btn-outline-light shot-lightbox-close">Close</button>
+        <img alt="" />
+        <p class="shot-lightbox-caption"></p>
+        <div class="shot-controls">
+          <button type="button" class="btn btn-outline-light shot-lightbox-prev">Previous</button>
+          <button type="button" class="btn btn-outline-light shot-lightbox-next">Next</button>
+        </div>
       </div>
 
       <h2 class="mt-4">Start a session</h2>
@@ -375,5 +294,139 @@
     </section>
 
     <script src="../script.js"></script>
+    <script>
+      (function () {
+        var root = document.querySelector("[data-shot-viewer]");
+        var box = document.querySelector(".shot-lightbox");
+        if (!root || !box) return;
+
+        var frame = root.querySelector(".shot-frame");
+        var image = frame.querySelector("img");
+        var caption = root.querySelector(".shot-caption-text");
+        var count = root.querySelector(".shot-count");
+        var rail = root.querySelector(".shot-thumbs");
+        var thumbs = Array.prototype.slice.call(rail.querySelectorAll("a"));
+        var boxImage = box.querySelector("img");
+        var boxCaption = box.querySelector(".shot-lightbox-caption");
+        var index = 0;
+        var lastFocus = null;
+        var ready = false;
+
+        function show(next) {
+          index = (next + thumbs.length) % thumbs.length;
+          var thumb = thumbs[index];
+          var src = thumb.getAttribute("href");
+          var text = thumb.getAttribute("data-caption");
+          image.src = src;
+          image.alt = thumb.querySelector("img").alt;
+          frame.href = src;
+          caption.textContent = text;
+          count.textContent = index + 1 + " of " + thumbs.length;
+          thumbs.forEach(function (el, i) {
+            if (i === index) el.setAttribute("aria-current", "true");
+            else el.removeAttribute("aria-current");
+          });
+          if (!box.hidden) {
+            boxImage.src = src;
+            boxImage.alt = image.alt;
+            boxCaption.textContent = text;
+          }
+          if (ready) {
+            var edge = thumb.offsetLeft - rail.scrollLeft;
+            if (edge < 8 || edge + thumb.offsetWidth > rail.clientWidth - 8) {
+              rail.scrollLeft = thumb.offsetLeft - 12;
+            }
+          }
+        }
+
+        function openBox() {
+          lastFocus = document.activeElement;
+          box.hidden = false;
+          document.body.classList.add("shot-lightbox-open");
+          boxImage.src = image.currentSrc || image.src;
+          boxImage.alt = image.alt;
+          boxCaption.textContent = caption.textContent;
+          box.querySelector(".shot-lightbox-close").focus();
+        }
+
+        function closeBox() {
+          box.hidden = true;
+          document.body.classList.remove("shot-lightbox-open");
+          if (lastFocus && lastFocus.focus) lastFocus.focus();
+        }
+
+        function swipe(target) {
+          var startX = null;
+          var startY = null;
+          target.addEventListener(
+            "touchstart",
+            function (event) {
+              startX = event.changedTouches[0].clientX;
+              startY = event.changedTouches[0].clientY;
+            },
+            { passive: true }
+          );
+          target.addEventListener(
+            "touchend",
+            function (event) {
+              if (startX == null) return;
+              var dx = event.changedTouches[0].clientX - startX;
+              var dy = event.changedTouches[0].clientY - startY;
+              if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) {
+                show(index + (dx < 0 ? 1 : -1));
+              }
+              startX = null;
+              startY = null;
+            },
+            { passive: true }
+          );
+        }
+
+        root.querySelector(".shot-prev").addEventListener("click", function () {
+          show(index - 1);
+        });
+        root.querySelector(".shot-next").addEventListener("click", function () {
+          show(index + 1);
+        });
+        box.querySelector(".shot-lightbox-prev").addEventListener("click", function () {
+          show(index - 1);
+        });
+        box.querySelector(".shot-lightbox-next").addEventListener("click", function () {
+          show(index + 1);
+        });
+        box.querySelector(".shot-lightbox-close").addEventListener("click", closeBox);
+        box.addEventListener("click", function (event) {
+          if (event.target === box) closeBox();
+        });
+        frame.addEventListener("click", function (event) {
+          event.preventDefault();
+          openBox();
+        });
+        thumbs.forEach(function (thumb, i) {
+          thumb.addEventListener("click", function (event) {
+            event.preventDefault();
+            show(i);
+          });
+        });
+        document.addEventListener("keydown", function (event) {
+          var inside = root.contains(document.activeElement) || !box.hidden;
+          if (!inside) return;
+          if (event.key === "Escape" && !box.hidden) {
+            event.preventDefault();
+            closeBox();
+          } else if (event.key === "ArrowRight") {
+            event.preventDefault();
+            show(index + 1);
+          } else if (event.key === "ArrowLeft") {
+            event.preventDefault();
+            show(index - 1);
+          }
+        });
+        swipe(frame);
+        swipe(boxImage);
+        show(0);
+        ready = true;
+      })();
+    </script>
   </body>
 </html>

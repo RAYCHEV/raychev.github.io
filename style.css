@@ -917,45 +917,138 @@ body.csv-page[data-theme="dark"] .btn-link {
   text-align: center;
 }
 
-.shot-scroller {
+.shot-viewer {
   display: flex;
-  gap: 16px;
+  flex-direction: column;
+  align-items: center;
+}
+
+.shot-frame {
+  display: block;
+  line-height: 0;
+  border-radius: 24px;
+  overflow: hidden;
+  background: #efeef3;
+  box-shadow: 0 12px 32px rgba(24, 28, 40, 0.16);
+  cursor: zoom-in;
+}
+
+.shot-frame img {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: min(280px, calc(100vw - 2.5rem));
+  max-height: min(54vh, 520px);
+}
+
+.shot-caption-text {
+  max-width: 36rem;
+  margin: 14px 0 0;
+  text-align: center;
+}
+
+.shot-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  margin-top: 12px;
+}
+
+.shot-controls .btn {
+  flex: 0 0 auto;
+}
+
+.shot-count {
+  min-width: 4.5rem;
+  color: #6c757d;
+  text-align: center;
+}
+
+.shot-thumbs {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+  margin-top: 16px;
   overflow-x: auto;
-  padding: 4px 2px 18px;
-  scroll-snap-type: x mandatory;
+  padding: 4px 2px 8px;
   -webkit-overflow-scrolling: touch;
 }
 
-.shot-card {
+.shot-thumbs a {
   flex: 0 0 auto;
-  width: 190px;
-  margin: 0;
-  scroll-snap-align: start;
-}
-
-.shot-card a {
   display: block;
-  border-radius: 18px;
+  border-radius: 8px;
   overflow: hidden;
-  background: #efeef3;
-  box-shadow: 0 8px 22px rgba(24, 28, 40, 0.14);
+  line-height: 0;
+  opacity: 0.72;
 }
 
-.shot-card img {
+.shot-thumbs img {
   display: block;
-  width: 100%;
+  width: auto;
+  height: 72px;
+}
+
+.shot-thumbs a[aria-current="true"] {
+  opacity: 1;
+  outline: 2px solid #007bff;
+  outline-offset: 2px;
+}
+
+.shot-lightbox[hidden] {
+  display: none;
+}
+
+.shot-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 1100;
+  overflow: auto;
+  padding: 132px 16px 28px;
+  background: rgba(20, 22, 28, 0.94);
+}
+
+.shot-lightbox-close {
+  position: fixed;
+  top: 14px;
+  right: 16px;
+  z-index: 2;
+}
+
+.shot-lightbox img {
+  display: block;
+  width: min(96vw, 820px);
   height: auto;
+  max-width: 100%;
+  max-height: none;
+  margin: 0 auto;
+  border-radius: 18px;
 }
 
-.shot-card figcaption {
-  margin-top: 8px;
-  color: #495057;
-  font-size: 0.875rem;
-  line-height: 1.35;
+.shot-lightbox-caption {
+  position: fixed;
+  top: 64px;
+  right: 16px;
+  left: 16px;
+  z-index: 2;
+  max-width: none;
+  margin: 0;
+  color: #fff;
+  text-align: center;
 }
 
-@media (max-width: 600px) {
-  .shot-card {
-    width: min(190px, 62vw);
-  }
+.shot-lightbox .shot-controls {
+  position: fixed;
+  top: 14px;
+  left: 16px;
+  z-index: 2;
+  width: auto;
+  margin: 0;
+  background: transparent;
+}
+
+body.shot-lightbox-open {
+  overflow: hidden;
 }
