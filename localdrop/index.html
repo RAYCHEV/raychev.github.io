@@ -7,7 +7,7 @@
     <title>LocalDrop for Android</title>
     <meta
       name="description"
-      content="LocalDrop for Android. Share files, photos, text and links between your own devices on a local network. The first version is free."
+      content="LocalDrop for Android. Share files, photos, text and links between your own devices on a local network. LocalDrop is free. LocalDrop Premium adds a more stable background server and Phone hotspot mode."
     />
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
     <link rel="stylesheet" href="../style.css" />
@@ -42,13 +42,22 @@
 
     <section id="localdrop" class="container mt-5">
       <div class="app-heading">
-        <img
-          src="img/app-icon.png"
-          class="app-icon app-icon-lg"
-          alt="LocalDrop app icon"
-          width="72"
-          height="72"
-        />
+        <div class="app-icon-pair">
+          <img
+            src="img/app-icon.png"
+            class="app-icon app-icon-lg"
+            alt="LocalDrop app icon"
+            width="72"
+            height="72"
+          />
+          <img
+            src="img/app-icon-pro.png"
+            class="app-icon app-icon-lg"
+            alt="LocalDrop Premium app icon"
+            width="72"
+            height="72"
+          />
+        </div>
         <div>
           <h1>LocalDrop for Android</h1>
           <p class="lead mb-0">Your devices. One local connection.</p>
@@ -64,23 +73,90 @@
         code. The transfer goes directly from one device to the other.
       </p>
       <p>No accounts. No cloud. No internet connection required.</p>
-
-      <h2 class="mt-4" id="download" style="scroll-margin-top: 5.5rem;">Download LocalDrop</h2>
-      <p><strong>The first version is free.</strong></p>
-      <p>Start a local sharing session when you need it, then stop the server when you are done.</p>
       <p>
-        <a class="btn btn-primary" href="apk/localdrop.apk" download>
-          Download LocalDrop for Android (.apk)
-        </a>
+        LocalDrop is free. LocalDrop Premium is the same app, from €1 — one time, with a more stable
+        background server and a Phone hotspot mode.
       </p>
-      <ul class="list-unstyled">
-        <li><strong>Price:</strong> Free</li>
-        <li><strong>Platform:</strong> Android</li>
-        <li><strong>Version:</strong> 1.0.0</li>
-        <li><strong>Requires:</strong> Android 8.0 or later</li>
-        <li><strong>Distribution:</strong> Direct APK download</li>
-      </ul>
+
+      <h2 class="mt-4" id="download">Compare and download</h2>
       <p>
+        Both editions share files, photos, text and links between your devices. No accounts, no
+        cloud, and no internet.
+      </p>
+      <div class="edition-grid">
+        <div class="edition">
+          <div class="app-heading">
+            <img
+              src="img/app-icon.png"
+              class="app-icon app-icon-lg"
+              alt="LocalDrop app icon"
+              width="72"
+              height="72"
+            />
+            <div>
+              <h3>LocalDrop</h3>
+              <p class="edition-price">Free</p>
+            </div>
+          </div>
+          <ul>
+            <li>Local network through a Wi-Fi router or Ethernet, with approval or a PIN.</li>
+            <li>
+              The server stops when you leave the app, unless you keep it running with a
+              notification.
+            </li>
+          </ul>
+          <p>
+            <a class="btn btn-primary" href="apk/localdrop.apk" download>
+              Download LocalDrop for Android (.apk)
+            </a>
+          </p>
+          <ul class="list-unstyled mb-0">
+            <li><strong>Version:</strong> 1.0.0</li>
+            <li><strong>Requires:</strong> Android 8.0 or later</li>
+            <li><strong>Distribution:</strong> Direct APK download</li>
+          </ul>
+        </div>
+
+        <div class="edition">
+          <div class="app-heading">
+            <img
+              src="img/app-icon-pro.png"
+              class="app-icon app-icon-lg"
+              alt="LocalDrop Premium app icon"
+              width="72"
+              height="72"
+            />
+            <div>
+              <h3>LocalDrop Premium</h3>
+              <p class="edition-price">From €1 — one time</p>
+            </div>
+          </div>
+          <ul>
+            <li>Phone hotspot from the app, or the same local network.</li>
+            <li>The server stays more stable while the app is in the background.</li>
+            <li>On the hotspot, devices connect without a PIN or approval.</li>
+          </ul>
+          <p>
+            <a
+              class="btn btn-primary"
+              href="https://ko-fi.com/s/c6a0a09b48"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Download LocalDrop Premium for Android (.apk)
+            </a>
+          </p>
+          <ul class="list-unstyled mb-0">
+            <li><strong>Version:</strong> 1.1</li>
+            <li><strong>Requires:</strong> Android 8.0 or later</li>
+            <li><strong>Distribution:</strong> Direct APK download</li>
+          </ul>
+          <p class="mb-0 mt-3">
+            <a href="#premium">Phone hotspot mode and what Premium adds</a>
+          </p>
+        </div>
+      </div>
+      <p class="mt-3">
         APK installation may require permission to install applications from outside the Google
         Play Store.
       </p>
@@ -94,7 +170,7 @@
           instructions.
         </li>
         <li>Confirm the installation.</li>
-        <li>Open LocalDrop and start the server when you want to share.</li>
+        <li>Open the app and start the server when you want to share.</li>
       </ol>
       <p>
         Android may display a security warning because this version is not distributed through
@@ -142,8 +218,88 @@
         are on, a browser needs both. You can disconnect a device at any time.
       </p>
 
+      <h2 class="mt-4" id="premium">LocalDrop Premium</h2>
+      <p>
+        LocalDrop Premium is the same application. Two things change: the server keeps running more
+        reliably while the app is in the background, and a Phone hotspot mode is added.
+      </p>
+
+      <h3 class="mt-3">Connection</h3>
+      <p>The Home screen has a Connection section with two modes.</p>
+      <ul>
+        <li>
+          <strong>Local network</strong> — through a Wi-Fi router or Ethernet, as before, with
+          approval or a PIN.
+        </li>
+        <li>
+          <strong>Phone hotspot</strong> — other devices connect directly to the phone’s own Wi-Fi
+          network.
+        </li>
+      </ul>
+
+      <h3 class="mt-3">Hotspot from the app</h3>
+      <ul>
+        <li>Turn the hotspot on and off with one button inside LocalDrop.</li>
+        <li>Start server turns the hotspot on automatically if it is not running yet.</li>
+        <li>If a hotspot is already on from Android settings, LocalDrop uses it.</li>
+        <li>
+          The hotspot is private and has no internet access. Android generates the name and the
+          password.
+        </li>
+      </ul>
+
+      <h3 class="mt-3">Two QR codes</h3>
+      <ol>
+        <li>
+          A QR code to join the Wi-Fi hotspot, plus the network name and password, with a Copy
+          button.
+        </li>
+        <li>A QR code to open LocalDrop in the browser.</li>
+      </ol>
+
+      <h3 class="mt-3">Direct connection</h3>
+      <ul>
+        <li>In hotspot mode, devices connect at once, without a PIN and without approval.</li>
+        <li>
+          The browser connects automatically and recognises the device type, such as an iPhone, a
+          Mac, or a Windows PC.
+        </li>
+        <li>Only devices connected to the phone’s hotspot are accepted.</li>
+      </ul>
+
+      <h3 class="mt-3">Reliability</h3>
+      <ul>
+        <li>The server stays more stable while LocalDrop is in the background.</li>
+        <li>If the hotspot is turned off, the server stops and shows a clear message.</li>
+        <li>LocalDrop Premium supports the way Android 15 and later represents the hotspot.</li>
+      </ul>
+
+      <h3 class="mt-3">Start a hotspot session</h3>
+      <ol>
+        <li>On the Home screen, choose Phone hotspot.</li>
+        <li>Turn the hotspot on, or tap Start server and LocalDrop will turn it on.</li>
+        <li>
+          On the other device, scan the first QR code, or join the Wi-Fi using the name and
+          password.
+        </li>
+        <li>Scan the second QR code to open LocalDrop in the browser.</li>
+        <li>The browser connects on its own. Stop the server when you are finished.</li>
+      </ol>
+
+      <h3 class="mt-3">Good to know</h3>
+      <ul>
+        <li>Share the hotspot password only with people you trust.</li>
+        <li>
+          Nearby devices (Android 13 and later) or Location (Android 8 through 12) is requested
+          only when you use the hotspot.
+        </li>
+      </ul>
+
       <h2 class="mt-4">Screenshots</h2>
-      <p>Move through the screens with Previous and Next. Select a picture to open it full size.</p>
+      <p>
+        These screens are from LocalDrop. Phone hotspot mode is part of LocalDrop Premium. Move through
+        the screens with Previous and Next. Select a picture to open it full size.
+      </p>
       <div class="shot-viewer" data-shot-viewer>
         <a class="shot-frame" href="img/screenshots/01-home.png">
           <img
@@ -217,6 +373,11 @@
         <li>Send files, text or links. Stop the server when you are finished.</li>
       </ol>
       <p>
+        On LocalDrop Premium you can instead use
+        <a href="#premium">Phone hotspot mode</a>. Other devices join the phone’s Wi-Fi and connect
+        without a PIN or approval.
+      </p>
+      <p>
         Use LocalDrop on a trusted private network. Ordinary HTTP is not encrypted, so other
         people who can see that network may be able to read a transfer.
       </p>
@@ -236,8 +397,15 @@
 
       <h2 class="mt-4">Frequently Asked Questions</h2>
 
-      <h3 class="mt-3">Is this version free?</h3>
-      <p>Yes. LocalDrop 1.0.0 is free.</p>
+      <h3 class="mt-3">Is LocalDrop free?</h3>
+      <p>Yes. LocalDrop 1.0.0 is free. LocalDrop Premium is from €1, paid once.</p>
+
+      <h3 class="mt-3">What does LocalDrop Premium add?</h3>
+      <p>
+        The same app, with a more stable background server and Phone hotspot mode. In that mode
+        other devices join the phone’s own Wi-Fi and connect without a PIN or approval. Only
+        devices on that hotspot are accepted. Local network mode still uses approval or a PIN.
+      </p>
 
       <h3 class="mt-3">Do I need an account or an internet connection?</h3>
       <p>
@@ -281,11 +449,12 @@
 
       <h2 class="mt-4">Application Information</h2>
       <ul class="list-unstyled">
-        <li><strong>Application:</strong> LocalDrop</li>
+        <li><strong>Application:</strong> LocalDrop and LocalDrop Premium</li>
         <li><strong>Developer:</strong> TheXcoder</li>
         <li><strong>Platform:</strong> Android</li>
-        <li><strong>Version:</strong> 1.0.0</li>
-        <li><strong>Price:</strong> Free</li>
+        <li><strong>Free version:</strong> 1.0.0</li>
+        <li><strong>Premium version:</strong> 1.1</li>
+        <li><strong>Price:</strong> LocalDrop is free. LocalDrop Premium is from €1, paid once.</li>
       </ul>
       <p>
         <strong>LocalDrop by TheXcoder</strong><br />

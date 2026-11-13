@@ -130,8 +130,71 @@ h1 {
 }
 
 .app-heading .card-title,
-.app-heading h1 {
+.app-heading h1,
+.app-heading h3 {
   margin: 0;
+}
+
+.app-icon-pair {
+  display: flex;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.app-heading-stack {
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+
+.app-heading-stack .card-title {
+  flex: 1 0 100%;
+}
+
+.edition-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+@media (min-width: 768px) {
+  .edition-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.edition {
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  padding: 16px;
+  background: #fff;
+}
+
+.edition-price {
+  margin: 0.15rem 0 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.edition .btn:disabled,
+#live-projects .btn:disabled {
+  pointer-events: auto;
+  cursor: not-allowed;
+}
+
+#localdrop #download,
+#localdrop #premium {
+  scroll-margin-top: 5.5rem;
+}
+
+@media (max-width: 575.98px) {
+  #localdrop > .app-heading {
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+
+  #localdrop > .app-heading > div:last-child {
+    flex: 1 0 100%;
+  }
 }
 
 .card-title {
