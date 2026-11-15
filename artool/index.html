@@ -216,7 +216,7 @@
           </details>
 
           <div class="actions">
-            <p class="hint">Each file includes the grid and the lines on that picture.</p>
+            <p class="hint" id="save-hint">Each file includes the grid and the lines on that picture. On iPhone, tap Save Image to keep it in Photos.</p>
             <button type="button" id="save-both" class="save" disabled>Save both</button>
             <div class="save-split">
               <button type="button" id="save-reference" class="draw" disabled>Reference</button>
@@ -231,7 +231,7 @@
               <li>Drop a photo on the box, or click it. JPG and PNG are the most reliable, in Firefox or Chrome.</li>
               <li>Simplification pulls the picture into masses, the way squinting does. Tonal steps decides how many of those values remain.</li>
               <li>Black &amp; white is the value study. Color keeps the hues and only simplifies the light.</li>
-              <li>Choose a grid and where it shows: the reference, the study, or both. Save reference, save study, or save both. The file includes the grid and the lines on that picture.</li>
+              <li>Choose a grid and where it shows: the reference, the study, or both. Save reference, save study, or save both. The file includes the grid and the lines on that picture. On iPhone, the share sheet opens: tap Save Image to put it in Photos. If the sheet does not appear, press and hold the picture and tap Add to Photos.</li>
               <li>Hold Cmd or Alt and scroll to zoom the picture under the pointer. A trackpad pinch does the same. Drag a zoomed picture to move it. Turn Reference or Study off when you only need one.</li>
               <li>Proportions: draw a line on the reference or the study and give it a value, such as 1. Later lines show how they compare. Rename a line and the name is drawn on it. Turn on Show on both to see every line on both pictures, and turn it off to keep a line where you drew it. Esc cancels a point before the line is finished.</li>
               <li>Click either picture for fullscreen. Press Esc to come back.</li>
@@ -247,6 +247,14 @@
       </div>
 
       <p class="foot">This browser remembers the photo and the settings. Nothing is uploaded.</p>
+    </div>
+    <div id="save-sheet" class="save-sheet" hidden>
+      <div class="save-sheet-card" role="dialog" aria-modal="true" aria-labelledby="save-sheet-title">
+        <h2 id="save-sheet-title">Add to Photos</h2>
+        <p class="hint">Press and hold the picture, then tap Add to Photos.</p>
+        <img id="save-sheet-img" alt="" />
+        <button type="button" id="save-sheet-close" class="reset">Close</button>
+      </div>
     </div>
     <script src="script.js"></script>
   </body>

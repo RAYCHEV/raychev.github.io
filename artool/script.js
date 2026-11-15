@@ -884,11 +884,99 @@ function composeBoard(board) {
   return canvas;
 }
 
-function downloadCanvas(canvas, suffix) {
+var saveBusy = false;
+var photoHoldUrl = '';
+
+function isIOS() {
+  var ua = navigator.userAgent || '';
+  if (/iPad|iPhone|iPod/.test(ua)) return true;
+  return navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1;
+}
+
+function canvasFile(canvas, suffix) {
+  var url = canvas.toDataURL('image/png');
+  var binary = atob(url.slice(url.indexOf(',') + 1));
+  var bytes = new Uint8Array(binary.length);
+  var i;
+  for (i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  return new File([bytes], downloadName(suffix), { type: 'image/png' });
+}
+
+function canShareFile(file) {
+  if (!navigator.share || !navigator.canShare) return false;
+  try {
+    return navigator.canShare({ files: [file] });
+  } catch (err) {
+    return false;
+  }
+}
+
+function downloadBlob(file) {
   var link = document.createElement('a');
-  link.download = downloadName(suffix);
-  link.href = canvas.toDataURL('image/png');
+  var href = URL.createObjectURL(file);
+  link.href = href;
+  link.download = file.name;
+  document.body.appendChild(link);
   link.click();
+  link.remove();
+  setTimeout(function () { URL.revokeObjectURL(href); }, 1500);
+}
+
+function offerPhotoHold(file) {
+  var sheet = document.getElementById('save-sheet');
+  var img = document.getElementById('save-sheet-img');
+  if (!sheet || !img) {
+    showError('Press and hold the picture, then tap Add to Photos.');
+    return;
+  }
+  if (photoHoldUrl) URL.revokeObjectURL(photoHoldUrl);
+  photoHoldUrl = URL.createObjectURL(file);
+  img.src = photoHoldUrl;
+  img.alt = file.name;
+  sheet.hidden = false;
+}
+
+function closePhotoHold() {
+  var sheet = document.getElementById('save-sheet');
+  var img = document.getElementById('save-sheet-img');
+  if (sheet) sheet.hidden = true;
+  if (img) {
+    img.removeAttribute('src');
+    img.alt = '';
+  }
+  if (photoHoldUrl) {
+    URL.revokeObjectURL(photoHoldUrl);
+    photoHoldUrl = '';
+  }
+}
+
+function downloadCanvas(canvas, suffix) {
+  if (saveBusy) return;
+  var file;
+  try {
+    file = canvasFile(canvas, suffix);
+  } catch (err) {
+    console.error(err);
+    showError('Could not prepare that picture.');
+    return;
+  }
+  if (isIOS() && canShareFile(file)) {
+    saveBusy = true;
+    navigator.share({ files: [file] }).then(function () {
+      saveBusy = false;
+    }, function (err) {
+      saveBusy = false;
+      if (err && err.name === 'AbortError') return;
+      console.error(err);
+      offerPhotoHold(file);
+    });
+    return;
+  }
+  if (isIOS()) {
+    offerPhotoHold(file);
+    return;
+  }
+  downloadBlob(file);
 }
 
 function saveBoard(board) {
@@ -1517,6 +1605,11 @@ function bindExpand(frame) {
 
 function onExpandKey(e) {
   if (e.key !== 'Escape') return;
+  var sheet = document.getElementById('save-sheet');
+  if (sheet && !sheet.hidden) {
+    closePhotoHold();
+    return;
+  }
   if (fullscreenElement()) {
     exitFullscreen();
     return;
@@ -1850,6 +1943,11 @@ function init() {
   ui.saveReference.addEventListener('click', function () { saveBoard('reference'); });
   ui.saveStudy.addEventListener('click', function () { saveBoard('study'); });
   ui.saveBoth.addEventListener('click', saveBoth);
+  var saveSheet = document.getElementById('save-sheet');
+  document.getElementById('save-sheet-close').addEventListener('click', closePhotoHold);
+  saveSheet.addEventListener('click', function (e) {
+    if (e.target === saveSheet) closePhotoHold();
+  });
   ui.showReference.addEventListener('click', function () {
     setBoardShown('reference', !picture.reference.shown);
   });

@@ -806,6 +806,45 @@ details li { margin: 0.28rem 0; }
   font-size: 0.82rem;
 }
 
+.save-sheet {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(18, 17, 15, 0.78);
+}
+
+.save-sheet-card {
+  width: min(520px, 100%);
+  max-height: calc(100% - 12px);
+  overflow: auto;
+  padding: 18px 16px 12px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: #1c1a17;
+}
+
+.save-sheet-card h2 {
+  margin: 0;
+  font-family: var(--serif);
+  font-size: 1.45rem;
+  font-weight: 500;
+}
+
+.save-sheet-card img {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin-top: 12px;
+  border-radius: 10px;
+  background: #000;
+}
+
+.save-sheet-card .reset { margin-top: 8px; }
+
 .visually-hidden {
   position: absolute;
   width: 1px;
