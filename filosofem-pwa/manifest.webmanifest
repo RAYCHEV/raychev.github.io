@@ -1,0 +1,33 @@
+{
+  "id": "/filosofem-pwa/?edition=standard",
+  "name": "Filosofem",
+  "short_name": "Filosofem",
+  "description": "A quiet moment. A different perspective. Daily philosophy in English, Bulgarian, and Vietnamese.",
+  "start_url": "/filosofem-pwa/",
+  "scope": "/filosofem-pwa/",
+  "display": "standalone",
+  "orientation": "any",
+  "lang": "en",
+  "background_color": "#f5f2eb",
+  "theme_color": "#f5f2eb",
+  "icons": [
+    {
+      "src": "/filosofem-pwa/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/filosofem-pwa/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/filosofem-pwa/icons/maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

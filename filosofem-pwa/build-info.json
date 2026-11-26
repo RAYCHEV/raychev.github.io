@@ -1,0 +1,21 @@
+{
+  "edition": "free",
+  "name": "Filosofem",
+  "basePath": "/filosofem-pwa/",
+  "otherBasePath": "/filosofem-pwa/premium/",
+  "version": "1.0.0",
+  "cacheVersion": "b409d8987332b1ab",
+  "cacheName": "filosofem-free-2f66696c6f736f66656d2d7077612f-b409d8987332b1ab",
+  "files": [
+    "_expo/static/css/styles-7d0d27088fd4c0148ec91744affd9bcf.css",
+    "_expo/static/js/web/index-ae187624ffc999a82cbdaba05a4cad0b.js",
+    "icons/apple-touch-icon.png",
+    "icons/favicon.png",
+    "icons/icon-192.png",
+    "icons/icon-512.png",
+    "icons/maskable-512.png",
+    "index.html",
+    "manifest.webmanifest",
+    "metadata.json"
+  ]
+}
