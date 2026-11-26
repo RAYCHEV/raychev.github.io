@@ -3,7 +3,7 @@ const EDITION = "free";
 const BASE = "/filosofem-pwa/";
 const EXCLUDED = ["/filosofem-pwa/premium/"];
 const PREFIX = 'filosofem-' + EDITION + '-' + "2f66696c6f736f66656d2d7077612f" + '-';
-const CACHE = PREFIX + "b409d8987332b1ab";
+const CACHE = PREFIX + "c4e8a1b09f3d2e77";
 const PRECACHE = ["/filosofem-pwa/","/filosofem-pwa/_expo/static/css/styles-7d0d27088fd4c0148ec91744affd9bcf.css","/filosofem-pwa/_expo/static/js/web/index-ae187624ffc999a82cbdaba05a4cad0b.js","/filosofem-pwa/icons/apple-touch-icon.png","/filosofem-pwa/icons/favicon.png","/filosofem-pwa/icons/icon-192.png","/filosofem-pwa/icons/icon-512.png","/filosofem-pwa/icons/maskable-512.png","/filosofem-pwa/index.html","/filosofem-pwa/manifest.webmanifest","/filosofem-pwa/metadata.json"];
 const ASSETS = new Set(PRECACHE);
 const ROUTES = new Set(['', 'index.html', 'today', 'history', 'favorites', 'settings'].flatMap(route => [BASE + route, BASE + route + (route && route !== 'index.html' ? '/' : '')]));
