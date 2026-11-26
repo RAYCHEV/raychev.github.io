@@ -6,22 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
     <title>Filosofem Premium</title>
     <!-- The `react-native-web` recommended style reset: https://necolas.github.io/react-native-web/docs/setup/#root-element -->
-    <style id="expo-reset">
-      /* These styles make the body full-height */
-      html,
-      body {
-        height: 100%;
-      }
-      /* These styles disable body scrolling if you are using <ScrollView> */
-      body {
-        overflow: hidden;
-      }
-      /* These styles make the root element full-height */
-      #root {
-        display: flex;
-        height: 100%;
-        flex: 1;
-      }
+        <style id="expo-reset">
+      html, body, #root { height: auto; min-height: 100%; }
+      body { overflow-x: hidden; overflow-y: auto; }
+      #root { display: flex; min-height: 100%; flex-direction: column; }
     </style>
   <meta name="theme-color" content="#f5f2eb">
 <link rel="preload" href="/filosofem-pwa/premium/_expo/static/css/styles-7d0d27088fd4c0148ec91744affd9bcf.css" as="style">
