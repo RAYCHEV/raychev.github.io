@@ -3,8 +3,8 @@ const EDITION = "free";
 const BASE = "/filosofem-pwa/";
 const EXCLUDED = ["/filosofem-pwa/premium/"];
 const PREFIX = 'filosofem-' + EDITION + '-' + "2f66696c6f736f66656d2d7077612f" + '-';
-const CACHE = PREFIX + "080b26882658e918";
-const PRECACHE = ["/filosofem-pwa/","/filosofem-pwa/_expo/static/css/styles-8695903e49e9fd5a2170eea04e355ede.css","/filosofem-pwa/_expo/static/js/web/index-50ec362aa067822754eb2bcb868cc8a8.js","/filosofem-pwa/icons/apple-touch-icon.png","/filosofem-pwa/icons/favicon.png","/filosofem-pwa/icons/icon-192.png","/filosofem-pwa/icons/icon-512.png","/filosofem-pwa/icons/maskable-512.png","/filosofem-pwa/index.html","/filosofem-pwa/manifest.webmanifest","/filosofem-pwa/metadata.json"];
+const CACHE = PREFIX + "ded85b7cd11e21b0";
+const PRECACHE = ["/filosofem-pwa/","/filosofem-pwa/_expo/static/css/styles-4bed9bf86adc610efffd4a1e014c8f45.css","/filosofem-pwa/_expo/static/js/web/index-a499ca6ff3ee19f006065dfeeccff887.js","/filosofem-pwa/icons/apple-touch-icon.png","/filosofem-pwa/icons/favicon.png","/filosofem-pwa/icons/icon-192.png","/filosofem-pwa/icons/icon-512.png","/filosofem-pwa/icons/maskable-512.png","/filosofem-pwa/index.html","/filosofem-pwa/manifest.webmanifest","/filosofem-pwa/metadata.json"];
 const ASSETS = new Set(PRECACHE);
 const ROUTES = new Set(['', 'index.html', 'today', 'history', 'favorites', 'settings'].flatMap(route => [BASE + route, BASE + route + (route && route !== 'index.html' ? '/' : '')]));
 function owns(url) {
